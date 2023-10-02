@@ -19,14 +19,12 @@ const start = async () => {
         const result = spawnSync(
             "go",
             ["build", '-ldflags="-s -w"', "-o", outputFile],
-            {
-                cwd,
-                env,
-            }
+            { cwd, env, stdio: "inherit" }
         );
         if (result.signal !== 0) {
             throw new Error("Build failed");
         }
+        console.log(`Built ${outputFile}`);
     }
 };
 
