@@ -58,7 +58,7 @@ jobs:
               uses: ncipollo/release-action@v1
               with:
                   tag: v${{ steps.app_version.outputs.version }}
-                  artifacts: ${{ env.BUILD_DIR }}
+                  artifacts: ${{ env.BUILD_DIR }}/*
                   generateReleaseNotes: true
                   draft: true
                   artifactErrorsFailBuild: true
