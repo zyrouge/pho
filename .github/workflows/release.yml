@@ -51,10 +51,10 @@ jobs:
                           throw new Error(`${tagName} tag already exists (received status code: ${statusCode})`);
                       }
 
-            - name: 🔨 Build executable
+            - name: 🔨 Build executables
               run: node ./scripts/build.js
 
-            - name: 🚀 Upload executable
+            - name: 🚀 Upload executables
               uses: ncipollo/release-action@v1
               with:
                   tag: v${{ steps.app_version.outputs.version }}

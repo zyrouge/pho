@@ -18,12 +18,10 @@ jobs:
                   go-version-file: go.mod
                   cache-dependency-path: go.sum
 
-            - name: 🔨 Build executable
-              run: go build -ldflags="-s -w" -o $BUILD_EXE_FILE
-              env:
-                  BUILD_EXE_FILE: ${{ env.BUILD_EXE_FILE }}
+            - name: 🔨 Build executables
+              run: node ./scripts/build.js
 
-            - name: 🚀 Upload executable
+            - name: 🚀 Upload executables
               uses: actions/upload-artifact@v3
               with:
                   path: ${{ env.BUILD_DIR }}
