@@ -8,7 +8,7 @@ const buildArchs = ["386", "amd64", "arm", "arm64"];
 
 const start = async () => {
     for (const arch of buildArchs) {
-        const cwd = process.cwd;
+        const cwd = process.cwd();
         const env = {
             ...process.env,
             GOOS: "linux",
