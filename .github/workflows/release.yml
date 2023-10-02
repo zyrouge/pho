@@ -52,7 +52,7 @@ jobs:
                       }
 
             - name: 🔨 Build executable
-              run: go build -o $BUILD_EXE_FILE
+              run: go build -ldflags="-s -w" -o $BUILD_EXE_FILE
               env:
                   BUILD_EXE_FILE: ${{ env.BUILD_EXE_FILE }}
 
