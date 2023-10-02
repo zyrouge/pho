@@ -1,0 +1,63 @@
+name: Release
+
+on:
+    workflow_dispatch:
+
+env:
+    BUILD_EXE_FILE: ./dist/pho
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version-file: go.mod
+                  cache-dependency-path: go.sum
+
+            - name: 🔢 Get version
+              id: app_version
+              run: echo "version=$(node ./scripts/print-version.js)" >> $GITHUB_OUTPUT
+
+            - name: 🔎 Check for release
+              uses: actions/github-script@v6
+              env:
+                  APP_VERSION_NAME: ${{ steps.app_version.outputs.version }}
+              with:
+                  script: |
+                      const tagName = `v${process.env["APP_VERSION_NAME"]}`;
+                      let statusCode;
+                      try {
+                          const result = await github.rest.repos.getReleaseByTag({
+                              tag: tagName,
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                          });
+                          statusCode = result.status;
+                      } catch (err) {
+                          statusCode = err.status;
+                      }
+                      if (statusCode !== 404) {
+                          throw new Error(`${tagName} tag already exists (received status code: ${statusCode})`);
+                      }
+
+            - name: 🔨 Build executable
+              run: go build main.go -o $BUILD_EXE_FILE
+              env:
+                  APP_VERSION_NAME: ${{ env.BUILD_EXE_FILE }}
+
+            - name: 🚀 Upload executable
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: v${{ steps.app_version.outputs.version }}
+                  artifacts: ${{ env.BUILD_EXE_FILE }}
+                  generateReleaseNotes: true
+                  draft: true
+                  artifactErrorsFailBuild: true

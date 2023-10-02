@@ -1,0 +1,29 @@
+name: Release
+
+on:
+    workflow_dispatch:
+
+env:
+    BUILD_EXE_FILE: ./dist/pho
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v4
+              with:
+                  go-version-file: go.mod
+                  cache-dependency-path: go.sum
+
+            - name: 🔨 Build executable
+              run: go build main.go -o $BUILD_EXE_FILE
+              env:
+                  APP_VERSION_NAME: ${{ env.BUILD_EXE_FILE }}
+
+            - name: 🚀 Upload executable
+              uses: actions/upload-artifact@v3
+              with:
+                  path: ${{ env.BUILD_EXE_FILE }}
