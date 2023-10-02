@@ -31,6 +31,7 @@ func main() {
 			&commands.InstallCommand,
 			&commands.UninstallCommand,
 			&commands.ListCommand,
+			&commands.TidyBrokenCommand,
 		},
 	}
 
