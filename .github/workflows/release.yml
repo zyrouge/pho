@@ -3,6 +3,9 @@ name: Release
 on:
     workflow_dispatch:
 
+permissions:
+    contents: write
+
 env:
     BUILD_EXE_FILE: ./dist/pho
 
