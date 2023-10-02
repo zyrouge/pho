@@ -49,7 +49,7 @@ jobs:
                       }
 
             - name: 🔨 Build executable
-              run: go build main.go -o $BUILD_EXE_FILE
+              run: go build -o $BUILD_EXE_FILE
               env:
                   BUILD_EXE_FILE: ${{ env.BUILD_EXE_FILE }}
 
