@@ -11,15 +11,8 @@ import (
 
 var ListCommand = cli.Command{
 	Name:    "list",
-	Aliases: []string{},
+	Aliases: []string{"installed"},
 	Usage:   "List all installed applications",
-	Flags: []cli.Flag{
-		&cli.BoolFlag{
-			Name:    "assume-yes",
-			Aliases: []string{"y"},
-			Usage:   "Automatically answer yes for questions",
-		},
-	},
 	Action: func(ctx *cli.Context) error {
 		config, err := core.GetConfig()
 		if err != nil {
