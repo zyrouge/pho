@@ -7,7 +7,7 @@ permissions:
     contents: write
 
 env:
-    BUILD_EXE_FILE: ./dist/pho
+    BUILD_DIR: ./dist
 
 jobs:
     release:
@@ -52,15 +52,13 @@ jobs:
                       }
 
             - name: 🔨 Build executable
-              run: go build -ldflags="-s -w" -o $BUILD_EXE_FILE
-              env:
-                  BUILD_EXE_FILE: ${{ env.BUILD_EXE_FILE }}
+              run: node ./scripts/build.js
 
             - name: 🚀 Upload executable
               uses: ncipollo/release-action@v1
               with:
                   tag: v${{ steps.app_version.outputs.version }}
-                  artifacts: ${{ env.BUILD_EXE_FILE }}
+                  artifacts: ${{ env.BUILD_DIR }}
                   generateReleaseNotes: true
                   draft: true
                   artifactErrorsFailBuild: true

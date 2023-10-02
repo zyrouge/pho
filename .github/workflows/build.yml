@@ -4,7 +4,7 @@ on:
     workflow_dispatch:
 
 env:
-    BUILD_EXE_FILE: ./dist/pho
+    BUILD_DIR: ./dist
 
 jobs:
     build:
@@ -26,4 +26,4 @@ jobs:
             - name: 🚀 Upload executable
               uses: actions/upload-artifact@v3
               with:
-                  path: ${{ env.BUILD_EXE_FILE }}
+                  path: ${{ env.BUILD_DIR }}
