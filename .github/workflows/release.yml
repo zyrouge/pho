@@ -51,7 +51,7 @@ jobs:
             - name: 🔨 Build executable
               run: go build main.go -o $BUILD_EXE_FILE
               env:
-                  APP_VERSION_NAME: ${{ env.BUILD_EXE_FILE }}
+                  BUILD_EXE_FILE: ${{ env.BUILD_EXE_FILE }}
 
             - name: 🚀 Upload executable
               uses: ncipollo/release-action@v1
