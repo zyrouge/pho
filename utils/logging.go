@@ -77,7 +77,7 @@ func (table *LogTable) AddColumn(column []string) {
 		table.ColumnsCount = columnCount
 	}
 	for i, x := range column {
-		currWidth := len(x)
+		currWidth := len(StripAnsi(x))
 		if currWidth > table.RowWidths[i] {
 			table.RowWidths[i] = currWidth
 		}
@@ -90,9 +90,10 @@ func (table *LogTable) Build() string {
 		isLastRow := i == table.RowsCount-1
 		for j, x := range row {
 			isLastColumn := j == table.ColumnsCount-1
-			width := table.RowWidths[j]
+			maxWidth := table.RowWidths[j]
+			currWidth := len(StripAnsi(x))
 			text.WriteString(x)
-			text.WriteString(strings.Repeat(" ", width-len(x)))
+			text.WriteString(strings.Repeat(" ", maxWidth-currWidth))
 			if !isLastColumn {
 				text.WriteString(table.ColumnSeparator)
 			}

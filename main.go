@@ -29,6 +29,8 @@ func main() {
 		Commands: []*cli.Command{
 			&commands.InitCommand,
 			&commands.InstallCommand,
+			&commands.UninstallCommand,
+			&commands.ListCommand,
 		},
 	}
 

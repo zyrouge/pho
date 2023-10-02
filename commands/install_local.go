@@ -148,9 +148,9 @@ var InstallLocalCommand = cli.Command{
 		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(appPaths.AppImage))
 		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
 		summary.Print()
-		utils.LogLn()
 
 		if !assumeYes {
+			utils.LogLn()
 			proceed, err := utils.PromptYesNoInput(reader, "Do you want to proceed?")
 			if err != nil {
 				return err
@@ -165,6 +165,7 @@ var InstallLocalCommand = cli.Command{
 			Id:       appId,
 			Name:     appName,
 			AppImage: appPaths.AppImage,
+			Icon:     appPaths.Icon,
 			Version:  appVersion,
 			Source:   core.LocalSourceId,
 		}

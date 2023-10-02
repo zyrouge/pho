@@ -11,6 +11,7 @@ type AppConfig struct {
 	Id       string `json:"Id"`
 	Name     string `json:"Name"`
 	AppImage string `json:"AppImage"`
+	Icon     string `json:"Icon"`
 	Version  string `json:"Version"`
 	Source   string `json:"Source"`
 }
@@ -43,14 +44,14 @@ type AppPaths struct {
 
 func GetAppPaths(config *Config, appId string, appName string) *AppPaths {
 	appDir := path.Join(config.AppsDir, appId)
-	cleanAppName := utils.CleanId(appName)
+	cleanAppName := utils.CleanText(appName)
 	if cleanAppName == "" {
 		cleanAppName = appId
 	}
 	return &AppPaths{
 		Dir:          appDir,
-		Config:       path.Join(appDir, "config.json"),
-		SourceConfig: path.Join(appDir, "source.config.json"),
+		Config:       path.Join(appDir, "config.zap.json"),
+		SourceConfig: path.Join(appDir, "source.config.zap.json"),
 		AppImage:     path.Join(appDir, fmt.Sprintf("%s.AppImage", cleanAppName)),
 		Icon:         path.Join(appDir, fmt.Sprintf("%s.png", cleanAppName)),
 		Desktop:      path.Join(config.DesktopDir, fmt.Sprintf("%s.desktop", appId)),

@@ -113,3 +113,8 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 	cmd := exec.Command("xdg-desktop-menu", "install", paths.Desktop, "--novendor")
 	return cmd.Run()
 }
+
+func UninstallDesktopFile(desktopFilePath string) error {
+	cmd := exec.Command("xdg-desktop-menu", "install", desktopFilePath, "--novendor")
+	return cmd.Run()
+}

@@ -134,6 +134,7 @@ var InstallGithubCommand = cli.Command{
 		summary.Add(utils.LogRightArrowPrefix, "Filename", color.CyanString(asset.Name))
 		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(appPaths.AppImage))
 		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
+		summary.Add(utils.LogRightArrowPrefix, "Download Size", color.CyanString(prettyBytes(asset.Size)))
 		summary.Print()
 		utils.LogLn()
 
@@ -152,6 +153,7 @@ var InstallGithubCommand = cli.Command{
 			Id:       appId,
 			Name:     appName,
 			AppImage: appPaths.AppImage,
+			Icon:     appPaths.Icon,
 			Version:  release.TagName,
 			Source:   core.GithubSourceId,
 		}
