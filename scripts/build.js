@@ -15,16 +15,16 @@ const start = async () => {
             GOARCH: arch,
         };
         const outputFile = p.join(outputDir, `pho-${arch}`);
-        console.log(`Building ${outputFile}...`);
+        console.log(`[info] Building "${outputFile}"...`);
         const result = spawnSync(
             "go",
-            ["build", '-ldflags="-s -w"', "-o", outputFile],
+            ["build", "-ldflags", "-s -w", "-o", outputFile],
             { cwd, env, stdio: "inherit" }
         );
-        if (result.signal !== 0) {
-            throw new Error("Build failed");
+        if (result.status !== 0) {
+            throw new Error("Build exited with non-zero exit code");
         }
-        console.log(`Built ${outputFile}`);
+        console.log(`[done] Built "${outputFile}" successfully`);
     }
 };
 
