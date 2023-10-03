@@ -146,7 +146,7 @@ var InstallHttpCommand = cli.Command{
 			}
 		}
 
-		urlMetadata, err := core.ExtractNetworkAssetMetadata(url)
+		assetMetadata, err := core.ExtractNetworkAssetMetadata(url)
 		if err != nil {
 			return err
 		}
@@ -162,7 +162,7 @@ var InstallHttpCommand = cli.Command{
 		source := &core.HttpSource{}
 		asset := &core.Asset{
 			Source:   url,
-			Size:     urlMetadata.Size,
+			Size:     assetMetadata.Size,
 			Download: core.NetworkAssetDownload(url),
 		}
 

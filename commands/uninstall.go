@@ -15,7 +15,7 @@ import (
 
 var UninstallCommand = cli.Command{
 	Name:    "uninstall",
-	Aliases: []string{"remove"},
+	Aliases: []string{"remove", "delete"},
 	Usage:   "Uninstall an application",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
@@ -146,14 +146,17 @@ func UninstallApp(app *core.AppConfig, appPaths *core.AppPaths) int {
 			failed++
 		}
 	}
+	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Dir))
 	if err = os.RemoveAll(appPaths.Dir); err != nil {
 		utils.LogError(err)
 		failed++
 	}
+	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Desktop))
 	if err = core.UninstallDesktopFile(appPaths.Desktop); err != nil {
 		utils.LogError(err)
 		failed++
 	}
+	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Desktop))
 	if err = os.Remove(appPaths.Desktop); err != nil {
 		utils.LogError(err)
 		failed++

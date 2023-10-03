@@ -105,6 +105,7 @@ var InstallGithubCommand = cli.Command{
 		if matchScore == core.AppImageAssetPartialMatch {
 			utils.LogWarning("no architecture specified in the asset name, cannot determine compatibility")
 		}
+		utils.LogDebug(fmt.Sprintf("selected asset url %s", asset.DownloadUrl))
 
 		appPaths := core.GetAppPaths(config, appId, appName)
 		if _, ok := config.Installed[appId]; ok {
