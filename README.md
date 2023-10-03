@@ -16,7 +16,7 @@
 -   Supports updation of AppImages.
 -   You can manually edit configuration files of Pho to further customize functionality.
 
-> Notes:
+##### Notes:
 
 -   AppImages must follow AppImage Specification to be integrated with desktop.
 -   Only for AppImages fetched from Github Releases support updating.
