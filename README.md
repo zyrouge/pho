@@ -26,7 +26,7 @@
 
 | Binary name | Platform   |
 | ----------- | ---------- |
-| `pho-amd`   | 32-bit AMD |
+| `pho-386`   | 32-bit AMD |
 | `pho-amd64` | 64-bit AMD |
 | `pho-arm`   | 32-bit ARM |
 | `pho-arm64` | 32-bit ARM |
