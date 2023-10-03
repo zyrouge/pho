@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
@@ -32,39 +33,62 @@ var UninstallCommand = cli.Command{
 		reader := bufio.NewReader(os.Stdin)
 		args := ctx.Args()
 		if args.Len() == 0 {
-			return errors.New("no application id specified")
-		}
-		if args.Len() > 1 {
-			return errors.New("unexpected excessive arguments")
+			return errors.New("no application ids specified")
 		}
 
-		appId := args.Get(0)
+		appIds := args.Slice()
 		assumeYes := ctx.Bool("assume-yes")
-		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
+		utils.LogDebug(fmt.Sprintf("argument ids: %s", strings.Join(appIds, ", ")))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
-		if _, ok := config.Installed[appId]; !ok {
-			return fmt.Errorf(
-				"application with id %s is not installed",
-				color.CyanString(appId),
+		utils.LogLn()
+		failed := 0
+		uninstallables := []core.AppConfig{}
+		for _, appId := range appIds {
+			if _, ok := config.Installed[appId]; !ok {
+				failed++
+				utils.LogError(
+					fmt.Sprintf(
+						"application with id %s is not installed",
+						color.CyanString(appId),
+					),
+				)
+				continue
+			}
+			appPaths := core.GetAppPaths(config, appId, "")
+			app, err := core.ReadAppConfig(appPaths.Config)
+			if err != nil {
+				failed++
+				utils.LogError(err)
+				continue
+			}
+			uninstallables = append(uninstallables, *app)
+		}
+		if len(uninstallables) == 0 {
+			return nil
+		}
+		if failed > 0 {
+			utils.LogLn()
+		}
+
+		summary := utils.NewLogTable()
+		headingColor := color.New(color.Underline, color.Bold)
+		summary.Add(
+			headingColor.Sprint("Index"),
+			headingColor.Sprint("Application ID"),
+			headingColor.Sprint("Application Name"),
+			headingColor.Sprint("Version"),
+		)
+		i := 0
+		for _, x := range uninstallables {
+			i++
+			summary.Add(
+				fmt.Sprintf("%d.", i),
+				color.RedString(x.Id),
+				color.RedString(x.Name),
+				x.Version,
 			)
 		}
-
-		appPaths := core.GetAppPaths(config, appId, "")
-		app, err := core.ReadAppConfig(appPaths.Config)
-		if err != nil {
-			return err
-		}
-		// re-constrct paths since the previous one did not specify app name
-		appPaths = core.GetAppPaths(config, appId, app.Name)
-
-		utils.LogLn()
-		summary := utils.NewLogTable()
-		summary.Add(utils.LogRightArrowPrefix, "Name", color.RedString(app.Name))
-		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.RedString(app.Id))
-		summary.Add(utils.LogRightArrowPrefix, "Version", color.RedString(app.Version))
-		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.RedString(app.AppImage))
-		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.RedString(appPaths.Desktop))
 		summary.Print()
 
 		if !assumeYes {
@@ -80,23 +104,27 @@ var UninstallCommand = cli.Command{
 		}
 
 		utils.LogLn()
-		errorCount := UninstallApp(app, appPaths)
-		if errorCount > 0 {
+		failed = 0
+		for _, x := range uninstallables {
+			appPaths := core.GetAppPaths(config, x.Id, x.Name)
+			failed += UninstallApp(&x, appPaths)
+		}
+		if failed > 0 {
 			utils.LogLn()
 			utils.LogInfo(
 				fmt.Sprintf(
-					"%s Uninstalled %s with %d errors.",
+					"%s Uninstalled %s applications with %s errors.",
 					utils.LogTickPrefix,
-					color.RedString(app.Name),
-					errorCount,
+					color.RedString(fmt.Sprint(len(uninstallables))),
+					color.RedString(fmt.Sprint(failed)),
 				),
 			)
 		} else {
 			utils.LogInfo(
 				fmt.Sprintf(
-					"%s Uninstalled %s successfully!",
+					"%s Uninstalled %s applications successfully!",
 					utils.LogTickPrefix,
-					color.RedString(app.Name),
+					color.RedString(fmt.Sprint(len(uninstallables))),
 				),
 			)
 		}

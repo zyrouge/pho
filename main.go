@@ -33,6 +33,7 @@ func main() {
 			&commands.UpdateCommand,
 			&commands.RunCommand,
 			&commands.ListCommand,
+			&commands.ViewCommand,
 			&commands.TidyBrokenCommand,
 		},
 	}

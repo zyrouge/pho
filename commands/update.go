@@ -49,7 +49,7 @@ var UpdateCommand = cli.Command{
 			return err
 		}
 		if len(updateables) == 0 {
-			if failed != 0 {
+			if failed > 0 {
 				utils.LogLn()
 			}
 			utils.LogInfo(
@@ -76,7 +76,7 @@ var UpdateCommand = cli.Command{
 			i++
 			summary.Add(
 				fmt.Sprintf("%d.", i),
-				x.App.Id,
+				color.CyanString(x.App.Id),
 				color.CyanString(x.App.Name),
 				x.App.Version,
 				color.CyanString(x.Update.Version),
@@ -169,7 +169,6 @@ func CheckAppUpdate(config *core.Config, appId string) (*UpdatableApp, error) {
 	if err != nil {
 		return nil, err
 	}
-	// re-constrct paths since the previous one did not specify app name
 	appPaths = core.GetAppPaths(config, appId, app.Name)
 	sourceConfig, err := core.ReadSourceConfig(app.Source, appPaths.SourceConfig)
 	if err != nil {
