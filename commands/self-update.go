@@ -41,13 +41,20 @@ var SelfUpdateCommand = cli.Command{
 			return err
 		}
 		defer data.Body.Close()
-		file, err := os.Create(os.Args[0])
+		executablePath, err := os.Executable()
+		if err != nil {
+			return err
+		}
+		file, err := os.Create(executablePath)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
 		_, err = io.Copy(file, data.Body)
 		if err != nil {
+			return err
+		}
+		if err = os.Chmod(executablePath, 0755); err != nil {
 			return err
 		}
 		utils.LogInfo(
