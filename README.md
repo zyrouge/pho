@@ -20,7 +20,7 @@
 
 1. All releases can be found [here](https://github.com/zyrouge/pho/releases). Choose a valid release.
 2. Binaries are built for 32-bit/64-bit AMD and ARM separately. Download the appropriate one.
-3. Place the downloaded binary in a folder that is available in the `PATH` environmental variable. Typically this would be `~/.local/bin`.
+3. Rename the downloaded binary to `pho` and place it in a folder that is available in the `PATH` environmental variable. Typically this would be `~/.local/bin`.
 4. Run `pho init` to setup necessary configuration.
 5. Have fun! 🎉
 
