@@ -20,6 +20,7 @@ var InstallCommand = cli.Command{
 	Commands: []*cli.Command{
 		&InstallGithubCommand,
 		&InstallLocalCommand,
+		&InstallHttpCommand,
 	},
 }
 

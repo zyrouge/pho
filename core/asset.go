@@ -37,6 +37,22 @@ func LocalAssetDownload(name string) AssetDownloadFunc {
 	}
 }
 
+type NetworkAssetMetadata struct {
+	Size int64
+}
+
+func ExtractNetworkAssetMetadata(url string) (*NetworkAssetMetadata, error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	metadata := &NetworkAssetMetadata{
+		Size: res.ContentLength,
+	}
+	return metadata, nil
+}
+
 func ChooseAptAppImageAsset[T any](assets []T, assetNameFunc func(*T) string) (int, *T) {
 	arch := utils.GetSystemArch()
 	var fallback *T
