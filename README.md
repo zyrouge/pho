@@ -10,17 +10,17 @@
 
 ## Features
 
--   Manage your AppImages by organizing them in a single folder.
--   Integrates your AppImages seamlessly. (AppImages must follow AppImage Specification to be integrated with desktop.)
+-   Manage AppImages by organizing them in a single folder.
+-   Integrates AppImages seamlessly. (AppImages must follow AppImage Specification to be integrated with desktop.)
 -   Ability to download AppImages from Github Releases and URLs.
 -   Supports updation of AppImages. (AppImages fetched from Github Releases only.)
--   You can manually edit configuration files of Pho to further customize functionality.
+-   Configuration files can be manually edit to further customize functionality.
 
 ## Installation
 
 1. All releases can be found [here](https://github.com/zyrouge/pho/releases). Choose a valid release.
 2. Binaries are built for 32-bit/64-bit AMD and ARM separately. Download the appropriate one.
-3. Place your downloaded binary in a folder that is available in the `PATH` environmental variable. Typically this would be `~/.local/bin`.
+3. Place the downloaded binary in a folder that is available in the `PATH` environmental variable. Typically this would be `~/.local/bin`.
 4. Run `pho init` to setup necessary configuration.
 5. Have fun! 🎉
 
