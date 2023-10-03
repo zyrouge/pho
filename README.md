@@ -31,6 +31,14 @@
 | `pho-arm`   | 32-bit ARM |
 | `pho-arm64` | 32-bit ARM |
 
+## Examples
+
+-   `pho init` - Initialize Pho configuration.
+-   `pho install local ./SomeApp.AppImage` - Install and integrate a local AppImage.
+-   `pho install github owner/repo` - Download, install and integrate an AppImage from Github Releases.
+-   `pho update` - Update all installed AppImages.
+-   `pho uninstall some-app` - Uninstall an AppImage.
+
 ## Developement
 
 0. Have Install [Go](https://go.dev/) and [Git](https://git-scm.com) installed.
