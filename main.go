@@ -35,6 +35,7 @@ func main() {
 			&commands.ListCommand,
 			&commands.ViewCommand,
 			&commands.TidyBrokenCommand,
+			&commands.SelfUpdateCommand,
 		},
 	}
 
