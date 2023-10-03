@@ -12,14 +12,14 @@
 
 -   Manage your AppImages by organizing them in a single folder.
 -   Integrates your AppImages seamlessly.
--   Ability to fetch AppImages from Github Releases, URLs and local AppImages.
--   Supports updating AppImages.
--   You can manually edit configuration files of Pho to further customize.
+-   Ability to download AppImages from Github Releases and URLs.
+-   Supports updation of AppImages.
+-   You can manually edit configuration files of Pho to further customize functionality.
 
-> Note:
->
-> -   AppImages must follow AppImage Specification to be integrated with desktop.
-> -   Only for AppImages fetched from Github Releases support updating.
+> Notes:
+
+-   AppImages must follow AppImage Specification to be integrated with desktop.
+-   Only for AppImages fetched from Github Releases support updating.
 
 ## Installation
 
