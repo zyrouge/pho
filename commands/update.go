@@ -2,9 +2,9 @@ package commands
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
@@ -31,54 +31,31 @@ var UpdateCommand = cli.Command{
 
 		reader := bufio.NewReader(os.Stdin)
 		args := ctx.Args()
-		if args.Len() == 0 {
-			return errors.New("no application id specified")
-		}
-		if args.Len() > 1 {
-			return errors.New("unexpected excessive arguments")
-		}
 
-		appId := args.Get(0)
+		appIds := args.Slice()
 		assumeYes := ctx.Bool("assume-yes")
-		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
+		utils.LogDebug(fmt.Sprintf("argument ids: %s", strings.Join(appIds, ", ")))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
-		if _, ok := config.Installed[appId]; !ok {
-			return fmt.Errorf(
-				"application with id %s is not installed",
-				color.CyanString(appId),
-			)
+		if len(appIds) == 0 {
+			for x := range config.Installed {
+				appIds = append(appIds, x)
+			}
 		}
 
-		appPaths := core.GetAppPaths(config, appId, "")
-		app, err := core.ReadAppConfig(appPaths.Config)
+		utils.LogLn()
+		updateables, failed, err := CheckAppUpdates(config, appIds)
 		if err != nil {
 			return err
 		}
-		// re-constrct paths since the previous one did not specify app name
-		appPaths = core.GetAppPaths(config, appId, app.Name)
-		sourceConfig, err := core.ReadSourceConfig(app.Source, appPaths.SourceConfig)
-		if err != nil {
-			return err
-		}
-		source, err := core.CastSourceConfigAsSource(sourceConfig)
-		if err != nil {
-			return err
-		}
-		if !source.SupportUpdates() {
-			return errors.New("application does not support automatic updates")
-		}
-		hasUpdates, update, err := source.CheckUpdate(app)
-		if err != nil {
-			return err
-		}
-		if !hasUpdates {
-			utils.LogLn()
+		if len(updateables) == 0 {
+			if failed != 0 {
+				utils.LogLn()
+			}
 			utils.LogInfo(
 				fmt.Sprintf(
-					"%s %s is already up-to-date.",
+					"%s Everything is up-to-date.",
 					utils.LogTickPrefix,
-					color.CyanString(app.Name),
 				),
 			)
 			return nil
@@ -86,20 +63,25 @@ var UpdateCommand = cli.Command{
 
 		utils.LogLn()
 		summary := utils.NewLogTable()
-		summary.Add(utils.LogRightArrowPrefix, "Name", color.CyanString(app.Name))
-		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.CyanString(app.Id))
+		headingColor := color.New(color.Underline, color.Bold)
 		summary.Add(
-			utils.LogRightArrowPrefix,
-			"Version",
-			fmt.Sprintf(
-				"%s %s %s",
-				color.HiBlackString(app.Version),
-				color.HiBlackString("->"),
-				color.CyanString(update.Version),
-			),
+			headingColor.Sprint("Index"),
+			headingColor.Sprint("Application ID"),
+			headingColor.Sprint("Application Name"),
+			headingColor.Sprint("Old Version"),
+			headingColor.Sprint("New Version"),
 		)
-		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(app.AppImage))
-		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
+		i := 0
+		for _, x := range updateables {
+			i++
+			summary.Add(
+				fmt.Sprintf("%d.", i),
+				x.App.Id,
+				color.CyanString(x.App.Name),
+				x.App.Version,
+				color.CyanString(x.Update.Version),
+			)
+		}
 		summary.Print()
 
 		if !assumeYes {
@@ -115,25 +97,103 @@ var UpdateCommand = cli.Command{
 		}
 
 		utils.LogLn()
-		installed, _ := InstallApps([]InstallableApp{{
-			App:    app,
-			Source: sourceConfig,
-			Paths:  appPaths,
-			Asset:  update.Asset,
-		}})
-		if installed != 1 {
-			return nil
+		installables := []InstallableApp{}
+		for _, x := range updateables {
+			x.App.Version = x.Update.Version
+			installables = append(installables, InstallableApp{
+				App:    x.App,
+				Source: x.Source,
+				Paths:  x.Paths,
+				Asset:  x.Update.Asset,
+			})
 		}
+		installed, failed := InstallApps(installables)
 
 		utils.LogLn()
-		utils.LogInfo(
-			fmt.Sprintf(
-				"%s Updated %s successfully!",
-				utils.LogTickPrefix,
-				color.CyanString(app.Name),
-			),
-		)
+		if installed > 0 {
+			utils.LogInfo(
+				fmt.Sprintf(
+					"%s Updated %s applications successfully!",
+					utils.LogTickPrefix,
+					color.CyanString(fmt.Sprint(installed)),
+				),
+			)
+		}
+		if failed > 0 {
+			utils.LogInfo(
+				fmt.Sprintf(
+					"%s Failed to update %s applications.",
+					utils.LogExclamationPrefix,
+					color.RedString(fmt.Sprint(failed)),
+				),
+			)
+		}
 
 		return nil
 	},
+}
+
+type UpdatableApp struct {
+	App    *core.AppConfig
+	Source any
+	Paths  *core.AppPaths
+	Update *core.SourceUpdate
+}
+
+func CheckAppUpdates(config *core.Config, appIds []string) ([]UpdatableApp, int, error) {
+	failed := 0
+	apps := []UpdatableApp{}
+	for _, appId := range appIds {
+		updatable, err := CheckAppUpdate(config, appId)
+		if err != nil {
+			failed++
+			utils.LogError(err)
+			continue
+		}
+		if updatable != nil {
+			apps = append(apps, *updatable)
+		}
+	}
+	return apps, failed, nil
+}
+
+func CheckAppUpdate(config *core.Config, appId string) (*UpdatableApp, error) {
+	if _, ok := config.Installed[appId]; !ok {
+		return nil, fmt.Errorf(
+			"application with id %s is not installed",
+			color.CyanString(appId),
+		)
+	}
+	appPaths := core.GetAppPaths(config, appId, "")
+	app, err := core.ReadAppConfig(appPaths.Config)
+	if err != nil {
+		return nil, err
+	}
+	// re-constrct paths since the previous one did not specify app name
+	appPaths = core.GetAppPaths(config, appId, app.Name)
+	sourceConfig, err := core.ReadSourceConfig(app.Source, appPaths.SourceConfig)
+	if err != nil {
+		return nil, err
+	}
+	source, err := core.CastSourceConfigAsSource(sourceConfig)
+	if err != nil {
+		return nil, err
+	}
+	if !source.SupportUpdates() {
+		return nil, nil
+	}
+	hasUpdate, update, err := source.CheckUpdate(app)
+	if err != nil {
+		return nil, err
+	}
+	if !hasUpdate {
+		return nil, err
+	}
+	updatable := &UpdatableApp{
+		App:    app,
+		Source: sourceConfig,
+		Paths:  appPaths,
+		Update: update,
+	}
+	return updatable, nil
 }
