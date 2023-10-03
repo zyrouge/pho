@@ -98,16 +98,11 @@ var InstallGithubCommand = cli.Command{
 		}
 		utils.LogDebug(fmt.Sprintf("selected github tag name: %s", release.TagName))
 
-		matchLevel, asset := core.ChooseAptAppImageAsset(
-			release.Assets,
-			func(x *core.GithubApiReleaseAsset) string {
-				return x.Name
-			},
-		)
-		if matchLevel == 0 {
+		matchScore, asset := release.ChooseAptAsset()
+		if matchScore == core.AppImageAssetNoMatch {
 			return fmt.Errorf("no valid asset in github tag %s", release.TagName)
 		}
-		if matchLevel == 1 {
+		if matchScore == core.AppImageAssetPartialMatch {
 			utils.LogWarning("no architecture specified in the asset name, cannot determine compatibility")
 		}
 

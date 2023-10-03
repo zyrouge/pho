@@ -232,7 +232,7 @@ func (x *InstallableApp) SaveConfig() error {
 	if err := core.SaveAppConfig(x.Paths.Config, x.App); err != nil {
 		return err
 	}
-	if err := core.SaveAppSourceConfig[any](x.Paths.SourceConfig, x.Source); err != nil {
+	if err := core.SaveSourceConfig[any](x.Paths.SourceConfig, x.Source); err != nil {
 		return err
 	}
 	config, err := core.ReadConfig()

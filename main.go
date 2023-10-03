@@ -30,6 +30,7 @@ func main() {
 			&commands.InitCommand,
 			&commands.InstallCommand,
 			&commands.UninstallCommand,
+			&commands.UpdateCommand,
 			&commands.RunCommand,
 			&commands.ListCommand,
 			&commands.TidyBrokenCommand,

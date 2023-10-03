@@ -53,7 +53,15 @@ func ExtractNetworkAssetMetadata(url string) (*NetworkAssetMetadata, error) {
 	return metadata, nil
 }
 
-func ChooseAptAppImageAsset[T any](assets []T, assetNameFunc func(*T) string) (int, *T) {
+type AppImageAssetMatch int
+
+const (
+	AppImageAssetNoMatch AppImageAssetMatch = iota
+	AppImageAssetPartialMatch
+	AppImageAssetExactMatch
+)
+
+func ChooseAptAppImageAsset[T any](assets []T, assetNameFunc func(*T) string) (AppImageAssetMatch, *T) {
 	arch := utils.GetSystemArch()
 	var fallback *T
 	for i := range assets {
@@ -64,7 +72,7 @@ func ChooseAptAppImageAsset[T any](assets []T, assetNameFunc func(*T) string) (i
 		}
 		matchedArch := extractArch(name)
 		if matchedArch == arch {
-			return 2, asset
+			return AppImageAssetExactMatch, asset
 		}
 		// no arch probably means they didnt include it
 		if matchedArch == "" {
@@ -72,9 +80,9 @@ func ChooseAptAppImageAsset[T any](assets []T, assetNameFunc func(*T) string) (i
 		}
 	}
 	if fallback != nil {
-		return 1, fallback
+		return AppImageAssetPartialMatch, fallback
 	}
-	return 0, nil
+	return AppImageAssetNoMatch, nil
 }
 
 func extractArch(name string) string {

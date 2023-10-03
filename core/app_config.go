@@ -7,13 +7,15 @@ import (
 	"github.com/zyrouge/pho/utils"
 )
 
+type SourceId string
+
 type AppConfig struct {
-	Id       string `json:"Id"`
-	Name     string `json:"Name"`
-	AppImage string `json:"AppImage"`
-	Icon     string `json:"Icon"`
-	Version  string `json:"Version"`
-	Source   string `json:"Source"`
+	Id       string   `json:"Id"`
+	Name     string   `json:"Name"`
+	AppImage string   `json:"AppImage"`
+	Icon     string   `json:"Icon"`
+	Version  string   `json:"Version"`
+	Source   SourceId `json:"Source"`
 }
 
 func ReadAppConfig(configPath string) (*AppConfig, error) {
@@ -24,7 +26,7 @@ func SaveAppConfig(configPath string, config *AppConfig) error {
 	return utils.WriteJsonFile[AppConfig](configPath, config)
 }
 
-func SaveAppSourceConfig[T any](configPath string, config T) error {
+func SaveSourceConfig[T any](configPath string, config T) error {
 	return utils.WriteJsonFile[T](configPath, &config)
 }
 

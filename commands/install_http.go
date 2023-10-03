@@ -157,9 +157,9 @@ var InstallHttpCommand = cli.Command{
 			AppImage: appPaths.AppImage,
 			Icon:     appPaths.Icon,
 			Version:  appVersion,
-			Source:   core.LocalSourceId,
+			Source:   core.HttpSourceId,
 		}
-		source := &core.LocalSource{}
+		source := &core.HttpSource{}
 		asset := &core.Asset{
 			Source:   url,
 			Size:     urlMetadata.Size,

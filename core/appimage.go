@@ -46,11 +46,7 @@ func (deflated *DeflatedAppImage) ExtractMetadata() (*DeflatedAppImageMetadata, 
 		return nil, err
 	}
 	desktopPath := path.Join(deflated.AppDir, fmt.Sprintf("%s.desktop", execName))
-	iconPath := path.Join(
-		deflated.AppDir,
-		"usr/share/icons/hicolor/1024x1024/apps",
-		fmt.Sprintf("%s.png", execName),
-	)
+	iconPath := path.Join(deflated.AppDir, ".DirIcon")
 	metadata := &DeflatedAppImageMetadata{
 		DeflatedAppImage: deflated,
 		ExecName:         execName,
