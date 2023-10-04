@@ -56,20 +56,18 @@ func (deflated *DeflatedAppImage) ExtractMetadata() (*DeflatedAppImageMetadata, 
 	return metadata, nil
 }
 
-var appRunExecNameRegex = regexp.MustCompile(`BIN="\$APPDIR\/([^"]+)"`)
-
 func (deflated *DeflatedAppImage) ExtractExecName() (string, error) {
-	appRunPath := path.Join(deflated.AppDir, "AppRun")
-	bytes, err := os.ReadFile(appRunPath)
+	files, err := os.ReadDir(deflated.AppDir)
 	if err != nil {
 		return "", err
 	}
-	content := string(bytes)
-	matches := appRunExecNameRegex.FindStringSubmatch(content)
-	if len(matches) != 2 {
-		return "", errors.New("cannot parse executable name from AppRun")
+	for _, x := range files {
+		name := x.Name()
+		if strings.HasSuffix(name, ".desktop") {
+			return strings.TrimSuffix(name, ".desktop"), nil
+		}
 	}
-	return matches[1], nil
+	return "", errors.New("cannot find .desktop file from AppDir")
 }
 
 func (metadata *DeflatedAppImageMetadata) CopyIconFile(paths *AppPaths) error {
@@ -102,6 +100,7 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 		1,
 	)
 	content = desktopFileIconRegex.ReplaceAllLiteralString(content, "")
+	content = strings.TrimSpace(content)
 	content += fmt.Sprintf("\nIcon=%s", paths.Icon)
 	if err = os.WriteFile(paths.Desktop, []byte(content), os.ModePerm); err != nil {
 		return err
