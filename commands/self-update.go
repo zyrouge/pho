@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/fatih/color"
@@ -45,13 +46,22 @@ var SelfUpdateCommand = cli.Command{
 		if err != nil {
 			return err
 		}
-		file, err := os.Create(executablePath)
+		tempFile, err := os.CreateTemp(
+			path.Dir(executablePath),
+			fmt.Sprintf("%s*", path.Base(executablePath)),
+		)
 		if err != nil {
 			return err
 		}
-		defer file.Close()
-		_, err = io.Copy(file, data.Body)
+		defer tempFile.Close()
+		_, err = io.Copy(tempFile, data.Body)
 		if err != nil {
+			return err
+		}
+		if err = os.Remove(executablePath); err != nil {
+			return err
+		}
+		if err = os.Rename(tempFile.Name(), executablePath); err != nil {
 			return err
 		}
 		if err = os.Chmod(executablePath, 0755); err != nil {
