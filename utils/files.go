@@ -10,10 +10,10 @@ import (
 
 var AtomicFilePrefix = "pho"
 
-func WriteFileAtomic(name string, bytes []byte) error {
+func CreateTempFile(name string) (*os.File, error) {
 	dir := path.Dir(name)
 	ext := path.Ext(name)
-	temp, err := os.CreateTemp(
+	return os.CreateTemp(
 		dir,
 		fmt.Sprintf(
 			"%s-%s-*%s",
@@ -22,6 +22,10 @@ func WriteFileAtomic(name string, bytes []byte) error {
 			ext,
 		),
 	)
+}
+
+func WriteFileAtomic(name string, bytes []byte) error {
+	temp, err := CreateTempFile(name)
 	if err != nil {
 		return err
 	}

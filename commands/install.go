@@ -186,19 +186,22 @@ func (x *InstallableApp) Download() error {
 	if err := os.MkdirAll(path.Dir(x.Paths.Desktop), os.ModePerm); err != nil {
 		return err
 	}
-	file, err := os.Create(x.Paths.AppImage)
+	tempFile, err := utils.CreateTempFile(x.Paths.AppImage)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer tempFile.Close()
 	data, err := x.Asset.Download()
 	if err != nil {
 		return err
 	}
 	defer data.Close()
-	mw := io.MultiWriter(file, x)
+	mw := io.MultiWriter(tempFile, x)
 	_, err = io.Copy(mw, data)
 	if err != nil {
+		return err
+	}
+	if err = os.Rename(tempFile.Name(), x.Paths.AppImage); err != nil {
 		return err
 	}
 	return os.Chmod(x.Paths.AppImage, 0755)

@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/fatih/color"
@@ -46,10 +45,7 @@ var SelfUpdateCommand = cli.Command{
 		if err != nil {
 			return err
 		}
-		tempFile, err := os.CreateTemp(
-			path.Dir(executablePath),
-			fmt.Sprintf("%s*", path.Base(executablePath)),
-		)
+		tempFile, err := utils.CreateTempFile(executablePath)
 		if err != nil {
 			return err
 		}
