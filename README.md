@@ -45,7 +45,7 @@
 1. Fork and/or Clone this repository.
 2. Install dependencies using `go get`.
 3. Run the application using `go run main.go`.
-4. Build the application using `go build -o ./dist/pho`.
+4. Build the application using `./scripts/build.sh`.
 
 ## Contributing
 
