@@ -13,17 +13,13 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-
             - uses: actions/setup-go@v4
               with:
                   go-version-file: go.mod
                   cache-dependency-path: go.sum
 
             - name: 🔨 Build executables
-              run: node ./scripts/build.js
+              run: ./scripts/build.sh
 
             - name: 🚀 Upload executables
               uses: actions/upload-artifact@v3

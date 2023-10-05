@@ -16,10 +16,6 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-
             - uses: actions/setup-go@v4
               with:
                   go-version-file: go.mod
@@ -27,7 +23,7 @@ jobs:
 
             - name: 🔢 Get version
               id: app_version
-              run: echo "version=$(node ./scripts/print-version.js)" >> $GITHUB_OUTPUT
+              run: echo "version=$(./scripts/print-version.sh)" >> $GITHUB_OUTPUT
 
             - name: 🔎 Check for existing tag
               run: ./scripts/check-tag-not-exists.sh $TAG_NAME
@@ -35,7 +31,7 @@ jobs:
                   TAG_NAME: v${{ steps.app_version.outputs.version }}
 
             - name: 🔨 Build executables
-              run: node ./scripts/build.js
+              run: ./scripts/build.sh
 
             - name: 🚀 Upload executables
               uses: ncipollo/release-action@v1
