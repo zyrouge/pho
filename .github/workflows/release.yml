@@ -29,27 +29,10 @@ jobs:
               id: app_version
               run: echo "version=$(node ./scripts/print-version.js)" >> $GITHUB_OUTPUT
 
-            - name: 🔎 Check for release
-              uses: actions/github-script@v6
+            - name: 🔎 Check for existing tag
+              run: git ls-remote --exit-code --tags origin $TAG_NAME
               env:
-                  APP_VERSION_NAME: ${{ steps.app_version.outputs.version }}
-              with:
-                  script: |
-                      const tagName = `v${process.env["APP_VERSION_NAME"]}`;
-                      let statusCode;
-                      try {
-                          const result = await github.rest.repos.getReleaseByTag({
-                              tag: tagName,
-                              owner: context.repo.owner,
-                              repo: context.repo.repo,
-                          });
-                          statusCode = result.status;
-                      } catch (err) {
-                          statusCode = err.status;
-                      }
-                      if (statusCode !== 404) {
-                          throw new Error(`${tagName} tag already exists (received status code: ${statusCode})`);
-                      }
+                  TAG_NAME: v${{ steps.app_version.outputs.version }}
 
             - name: 🔨 Build executables
               run: node ./scripts/build.js
