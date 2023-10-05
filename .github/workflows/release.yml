@@ -30,7 +30,7 @@ jobs:
               run: echo "version=$(node ./scripts/print-version.js)" >> $GITHUB_OUTPUT
 
             - name: 🔎 Check for existing tag
-              run: git ls-remote --exit-code --tags origin $TAG_NAME
+              run: ./scripts/check-tag-not-exists.sh $TAG_NAME
               env:
                   TAG_NAME: v${{ steps.app_version.outputs.version }}
 
