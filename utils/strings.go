@@ -32,7 +32,7 @@ func CleanName(text string) string {
 	return text
 }
 
-var titleCaseReplaceRegex = regexp.MustCompile(`/(\w)(\w+)/`)
+var titleCaseReplaceRegex = regexp.MustCompile(`\w{2,}`)
 
 func TitleCase(text string) string {
 	return titleCaseReplaceRegex.ReplaceAllStringFunc(
