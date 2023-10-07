@@ -38,7 +38,7 @@ jobs:
             - name: 🚀 Upload executables
               uses: ncipollo/release-action@v1
               with:
-                  tag: v${{ env.TAG_NAME }}
+                  tag: ${{ env.TAG_NAME }}
                   artifacts: ${{ env.BUILD_DIR }}/*
                   generateReleaseNotes: true
                   draft: true
