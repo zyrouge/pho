@@ -48,10 +48,10 @@ var UpdateCommand = cli.Command{
 		if err != nil {
 			return err
 		}
+		if failed > 0 {
+			utils.LogLn()
+		}
 		if len(updateables) == 0 {
-			if failed > 0 {
-				utils.LogLn()
-			}
 			utils.LogInfo(
 				fmt.Sprintf(
 					"%s Everything is up-to-date.",
@@ -61,7 +61,6 @@ var UpdateCommand = cli.Command{
 			return nil
 		}
 
-		utils.LogLn()
 		summary := utils.NewLogTable()
 		headingColor := color.New(color.Underline, color.Bold)
 		summary.Add(
