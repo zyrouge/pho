@@ -7,6 +7,8 @@ permissions:
     contents: write
 
 env:
+    APP_VERSION: ""
+    TAG_NAME: ""
     BUILD_DIR: ./dist
 
 jobs:
@@ -22,13 +24,13 @@ jobs:
                   cache-dependency-path: go.sum
 
             - name: 🔢 Get version
-              id: app_version
-              run: echo "version=$(./scripts/print-version.sh)" >> $GITHUB_OUTPUT
+              run: |
+                  version=$(./scripts/version.sh)
+                  echo "APP_VERSION=${version}" >> $GITHUB_ENV
+                  echo "TAG_NAME=v${version}" >> $GITHUB_ENV
 
-            - name: 🔎 Check for existing tag
-              run: ./scripts/check-tag-not-exists.sh $TAG_NAME
-              env:
-                  TAG_NAME: v${{ steps.app_version.outputs.version }}
+            - name: 🔎 Check tag availability
+              run: ./scripts/tag-available.sh $TAG_NAME
 
             - name: 🔨 Build executables
               run: ./scripts/build.sh
@@ -36,7 +38,7 @@ jobs:
             - name: 🚀 Upload executables
               uses: ncipollo/release-action@v1
               with:
-                  tag: v${{ steps.app_version.outputs.version }}
+                  tag: v${{ env.TAG_NAME }}
                   artifacts: ${{ env.BUILD_DIR }}/*
                   generateReleaseNotes: true
                   draft: true

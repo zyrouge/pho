@@ -8,5 +8,8 @@
             "source.organizeImports": true
         },
         "editor.defaultFormatter": "golang.go"
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
     }
 }
