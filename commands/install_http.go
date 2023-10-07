@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
@@ -67,7 +66,7 @@ var InstallHttpCommand = cli.Command{
 		}
 
 		if appId == "" {
-			appId = makeAppIdFromUrl(path.Base(url))
+			appId = core.ConstructAppId("", path.Base(url))
 			if !assumeYes {
 				appId, err = utils.PromptTextInput(
 					reader,
@@ -85,7 +84,7 @@ var InstallHttpCommand = cli.Command{
 		}
 
 		if appName == "" {
-			appName = makeAppNameFromId(appId)
+			appName = core.ConstructAppName(appId)
 			if !assumeYes {
 				appName, err = utils.PromptTextInput(
 					reader,
@@ -97,6 +96,7 @@ var InstallHttpCommand = cli.Command{
 				}
 			}
 		}
+		appName = utils.CleanText(appName)
 		if appName == "" {
 			return errors.New("invalid application name")
 		}
@@ -188,9 +188,4 @@ var InstallHttpCommand = cli.Command{
 
 		return nil
 	},
-}
-
-func makeAppIdFromUrl(url string) string {
-	parts := strings.Split(url, "/")
-	return makeAppIdFromName(parts[len(parts)-1])
 }

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
-	"unicode"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
@@ -82,7 +80,7 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		if appId == "" {
-			appId = makeAppIdFromName(path.Base(appImagePath))
+			appId = core.ConstructAppId("", path.Base(appImagePath))
 			if !assumeYes {
 				appId, err = utils.PromptTextInput(
 					reader,
@@ -100,7 +98,7 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		if appName == "" {
-			appName = makeAppNameFromId(appId)
+			appName = core.ConstructAppName(appId)
 			if !assumeYes {
 				appName, err = utils.PromptTextInput(
 					reader,
@@ -112,6 +110,7 @@ var InstallLocalCommand = cli.Command{
 				}
 			}
 		}
+		appName = utils.CleanText(appName)
 		if appName == "" {
 			return errors.New("invalid application name")
 		}
@@ -198,21 +197,4 @@ var InstallLocalCommand = cli.Command{
 
 		return nil
 	},
-}
-
-func makeAppIdFromName(name string) string {
-	for _, aliases := range utils.ArchMap {
-		for _, x := range aliases {
-			name = strings.Replace(name, x, "", 1)
-		}
-	}
-	name = strings.TrimSuffix(name, ".AppImage")
-	name = utils.CleanId(name)
-	return name
-}
-
-func makeAppNameFromId(str string) string {
-	runes := []rune(str)
-	runes[0] = unicode.ToUpper(runes[0])
-	return string(runes)
 }

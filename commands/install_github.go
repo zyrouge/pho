@@ -75,15 +75,21 @@ var InstallGithubCommand = cli.Command{
 		if !isValidUrl {
 			return errors.New("invalid github repo url")
 		}
-		if appName == "" {
-			appName = ghReponame
-		}
+
 		if appId == "" {
 			appId = core.ConstructAppId(ghUsername, ghReponame)
 		}
 		appId = utils.CleanId(appId)
 		if appId == "" {
 			return errors.New("invalid application id")
+		}
+
+		if appName == "" {
+			appName = core.ConstructAppName(ghReponame)
+		}
+		appName = utils.CleanText(appName)
+		if appName == "" {
+			return errors.New("invalid application name")
 		}
 
 		source := &core.GithubSource{

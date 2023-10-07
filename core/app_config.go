@@ -32,7 +32,12 @@ func SaveSourceConfig[T any](configPath string, config T) error {
 
 func ConstructAppId(owner string, appName string) string {
 	raw := fmt.Sprintf("%s-%s", owner, appName)
-	return utils.CleanId(raw)
+	raw = utils.CleanId(raw)
+	return raw
+}
+
+func ConstructAppName(appName string) string {
+	return utils.CleanName(appName)
 }
 
 type AppPaths struct {
