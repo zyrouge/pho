@@ -30,10 +30,8 @@ func SaveSourceConfig[T any](configPath string, config T) error {
 	return utils.WriteJsonFile[T](configPath, &config)
 }
 
-func ConstructAppId(owner string, appName string) string {
-	raw := fmt.Sprintf("%s-%s", owner, appName)
-	raw = utils.CleanId(raw)
-	return raw
+func ConstructAppId(appName string) string {
+	return utils.CleanId(appName)
 }
 
 func ConstructAppName(appName string) string {

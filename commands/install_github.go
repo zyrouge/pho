@@ -77,7 +77,7 @@ var InstallGithubCommand = cli.Command{
 		}
 
 		if appId == "" {
-			appId = core.ConstructAppId(ghUsername, ghReponame)
+			appId = core.ConstructAppId(fmt.Sprintf("%s-%s", ghUsername, ghReponame))
 		}
 		appId = utils.CleanId(appId)
 		if appId == "" {

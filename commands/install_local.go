@@ -80,7 +80,7 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		if appId == "" {
-			appId = core.ConstructAppId("", path.Base(appImagePath))
+			appId = core.ConstructAppId(path.Base(appImagePath))
 			if !assumeYes {
 				appId, err = utils.PromptTextInput(
 					reader,

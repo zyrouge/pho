@@ -66,7 +66,7 @@ var InstallHttpCommand = cli.Command{
 		}
 
 		if appId == "" {
-			appId = core.ConstructAppId("", path.Base(url))
+			appId = core.ConstructAppId(path.Base(url))
 			if !assumeYes {
 				appId, err = utils.PromptTextInput(
 					reader,
