@@ -105,7 +105,7 @@ var InstallHttpCommand = cli.Command{
 			appVersion = "0.0.0"
 		}
 
-		appPaths := core.GetAppPaths(config, appId, appName)
+		appPaths := core.ConstructAppPaths(config, appId, appName)
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(
 				fmt.Sprintf(
@@ -152,12 +152,11 @@ var InstallHttpCommand = cli.Command{
 		}
 
 		app := &core.AppConfig{
-			Id:       appId,
-			Name:     appName,
-			AppImage: appPaths.AppImage,
-			Icon:     appPaths.Icon,
-			Version:  appVersion,
-			Source:   core.HttpSourceId,
+			Id:      appId,
+			Name:    appName,
+			Version: appVersion,
+			Source:  core.HttpSourceId,
+			Paths:   *appPaths,
 		}
 		source := &core.HttpSource{}
 		asset := &core.Asset{

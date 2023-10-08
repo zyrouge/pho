@@ -119,7 +119,7 @@ var InstallLocalCommand = cli.Command{
 			appVersion = "0.0.0"
 		}
 
-		appPaths := core.GetAppPaths(config, appId, appName)
+		appPaths := core.ConstructAppPaths(config, appId, appName)
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(
 				fmt.Sprintf(
@@ -161,12 +161,11 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		app := &core.AppConfig{
-			Id:       appId,
-			Name:     appName,
-			AppImage: appPaths.AppImage,
-			Icon:     appPaths.Icon,
-			Version:  appVersion,
-			Source:   core.LocalSourceId,
+			Id:      appId,
+			Name:    appName,
+			Version: appVersion,
+			Source:  core.LocalSourceId,
+			Paths:   *appPaths,
 		}
 		source := &core.LocalSource{}
 		asset := &core.Asset{

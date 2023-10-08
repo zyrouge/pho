@@ -163,12 +163,12 @@ func CheckAppUpdate(config *core.Config, appId string) (*UpdatableApp, error) {
 			color.CyanString(appId),
 		)
 	}
-	appPaths := core.GetAppPaths(config, appId, "")
+	appPaths := core.ConstructAppPaths(config, appId, "")
 	app, err := core.ReadAppConfig(appPaths.Config)
 	if err != nil {
 		return nil, err
 	}
-	appPaths = core.GetAppPaths(config, appId, app.Name)
+	appPaths = core.ConstructAppPaths(config, appId, app.Name)
 	sourceConfig, err := core.ReadSourceConfig(app.Source, appPaths.SourceConfig)
 	if err != nil {
 		return nil, err

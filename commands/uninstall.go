@@ -55,7 +55,7 @@ var UninstallCommand = cli.Command{
 				)
 				continue
 			}
-			appPaths := core.GetAppPaths(config, appId, "")
+			appPaths := core.ConstructAppPaths(config, appId, "")
 			app, err := core.ReadAppConfig(appPaths.Config)
 			if err != nil {
 				failed++
@@ -106,7 +106,7 @@ var UninstallCommand = cli.Command{
 		utils.LogLn()
 		failed = 0
 		for _, x := range uninstallables {
-			appPaths := core.GetAppPaths(config, x.Id, x.Name)
+			appPaths := core.ConstructAppPaths(config, x.Id, x.Name)
 			failed += UninstallApp(&x, appPaths)
 		}
 		if failed > 0 {

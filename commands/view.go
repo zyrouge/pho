@@ -38,23 +38,22 @@ var ViewCommand = cli.Command{
 			)
 		}
 
-		appPaths := core.GetAppPaths(config, appId, "")
-		app, err := core.ReadAppConfig(appPaths.Config)
+		tempAppPaths := core.ConstructAppPaths(config, appId, "")
+		app, err := core.ReadAppConfig(tempAppPaths.Config)
 		if err != nil {
 			return err
 		}
-		appPaths = core.GetAppPaths(config, appId, app.Name)
 
 		utils.LogLn()
 		summary := utils.NewLogTable()
 		summary.Add(utils.LogRightArrowPrefix, "Name", color.CyanString(app.Name))
 		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.CyanString(app.Id))
 		summary.Add(utils.LogRightArrowPrefix, "Version", color.CyanString(app.Version))
-		summary.Add(utils.LogRightArrowPrefix, "Directory", color.CyanString(appPaths.Dir))
-		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(app.AppImage))
-		summary.Add(utils.LogRightArrowPrefix, "Icon", color.CyanString(appPaths.Icon))
-		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
 		summary.Add(utils.LogRightArrowPrefix, "Source", color.CyanString(string(app.Source)))
+		summary.Add(utils.LogRightArrowPrefix, "Directory", color.CyanString(app.Paths.Dir))
+		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(app.Paths.AppImage))
+		summary.Add(utils.LogRightArrowPrefix, "Icon", color.CyanString(app.Paths.Icon))
+		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(app.Paths.Desktop))
 		summary.Print()
 		utils.LogLn()
 

@@ -41,7 +41,7 @@ var RunCommand = cli.Command{
 			)
 		}
 
-		appPaths := core.GetAppPaths(config, appId, "")
+		appPaths := core.ConstructAppPaths(config, appId, "")
 		app, err := core.ReadAppConfig(appPaths.Config)
 		if err != nil {
 			return err
@@ -61,7 +61,7 @@ var RunCommand = cli.Command{
 		}
 
 		procAttr := &os.ProcAttr{
-			Dir: path.Dir(app.AppImage),
+			Dir: path.Dir(app.Paths.AppImage),
 			Env: os.Environ(),
 			Files: []*os.File{
 				stdin,
@@ -72,7 +72,7 @@ var RunCommand = cli.Command{
 				Foreground: true,
 			},
 		}
-		proc, err := os.StartProcess(app.AppImage, []string{}, procAttr)
+		proc, err := os.StartProcess(app.Paths.AppImage, []string{}, procAttr)
 		if err != nil {
 			return err
 		}

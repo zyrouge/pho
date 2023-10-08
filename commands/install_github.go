@@ -113,7 +113,7 @@ var InstallGithubCommand = cli.Command{
 		}
 		utils.LogDebug(fmt.Sprintf("selected asset url %s", asset.DownloadUrl))
 
-		appPaths := core.GetAppPaths(config, appId, appName)
+		appPaths := core.ConstructAppPaths(config, appId, appName)
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(fmt.Sprintf("application with id %s already exists", appId))
 			if !assumeYes {
@@ -152,12 +152,11 @@ var InstallGithubCommand = cli.Command{
 		}
 
 		app := &core.AppConfig{
-			Id:       appId,
-			Name:     appName,
-			AppImage: appPaths.AppImage,
-			Icon:     appPaths.Icon,
-			Version:  release.TagName,
-			Source:   core.GithubSourceId,
+			Id:      appId,
+			Name:    appName,
+			Version: release.TagName,
+			Source:  core.GithubSourceId,
+			Paths:   *appPaths,
 		}
 		utils.LogLn()
 		installed, _ := InstallApps([]InstallableApp{{
