@@ -18,6 +18,25 @@
 
 ## Installation
 
+### Using Script
+
+Run the below command in terminal. This installs Pho at `~/.local/bin`.
+
+```bash
+curl -Ls https://raw.githubusercontent.com/zyrouge/pho/main/install.sh | bash
+```
+
+If you need to install into a custom path, use the below command.
+
+```bash
+# ensure that the directory exists
+mkdir -p /custom/directory
+
+curl -Ls https://raw.githubusercontent.com/zyrouge/pho/main/install.sh | bash -s /custom/directory
+```
+
+### Manual
+
 1. All releases can be found [here](https://github.com/zyrouge/pho/releases). Choose a valid release.
 2. Binaries are built for 32-bit/64-bit AMD and ARM separately. Download the appropriate one.
 3. Rename the downloaded binary to `pho` and place it in a folder that is available in the `PATH` environmental variable. Typically this would be `~/.local/bin`.
