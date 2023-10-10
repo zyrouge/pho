@@ -10,22 +10,20 @@ then
 fi
 
 install_dir="${HOME}/.local/bin"
-custom_install_dir=false
 if [ -n "$1" ]; then
-    install_dir=$1
-    custom_install_dir=true
+    install_dir=$(readlink -f "$1")
 fi
 install_dir="${install_dir%/}"
 if ! [[ -d "${install_dir}" ]]; then
     echo "[error] Installation directory '${install_dir}' does not exist."
     exit 1
 fi
-if [[ $custom_install_dir ]]; then
-    echo "Kindly ensure that the installation directory exists in \$PATH variable"
-fi
 
 install_path="${install_dir}/pho"
 echo "Installation path set as '${install_dir}'"
+if ! [[ "${PATH}" == *":${install_dir}"* ]] && ! [[ "${PATH}" == *"${install_dir}:"* ]]; then
+    echo "Kindly ensure that the installation directory exists in \$PATH variable."
+fi
 
 arch=$(uname -m)
 case "${arch}" in
