@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"regexp"
 	"strings"
 	"unicode"
@@ -43,4 +44,23 @@ func TitleCase(text string) string {
 			return string(runes)
 		},
 	)
+}
+
+func PrettyJSONString(data any) (string, error) {
+	bytes, err := json.MarshalIndent(data, "", "    ")
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+func QuotedWhenSpace(text string) string {
+	return EncloseWhen(text, " ", `"`, `"`)
+}
+
+func EncloseWhen(text string, when string, start string, end string) string {
+	if !strings.Contains(text, when) {
+		return text
+	}
+	return start + text + end
 }

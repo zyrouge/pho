@@ -22,10 +22,6 @@ var InstallGithubCommand = cli.Command{
 			Usage: "Application identifier",
 		},
 		&cli.StringFlag{
-			Name:  "name",
-			Usage: "Application name",
-		},
-		&cli.StringFlag{
 			Name:  "tag",
 			Usage: "Tag name",
 		},
@@ -57,13 +53,11 @@ var InstallGithubCommand = cli.Command{
 
 		url := args.Get(0)
 		appId := ctx.String("id")
-		appName := ctx.String("name")
 		tagName := ctx.String("tag")
 		prerelease := ctx.Bool("prerelease")
 		assumeYes := ctx.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
-		utils.LogDebug(fmt.Sprintf("argument name: %s", appName))
 		utils.LogDebug(fmt.Sprintf("argument tag: %s", tagName))
 		utils.LogDebug(fmt.Sprintf("argument prerelease: %v", prerelease))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
@@ -82,14 +76,6 @@ var InstallGithubCommand = cli.Command{
 		appId = utils.CleanId(appId)
 		if appId == "" {
 			return errors.New("invalid application id")
-		}
-
-		if appName == "" {
-			appName = core.ConstructAppName(ghReponame)
-		}
-		appName = utils.CleanText(appName)
-		if appName == "" {
-			return errors.New("invalid application name")
 		}
 
 		source := &core.GithubSource{
@@ -113,7 +99,7 @@ var InstallGithubCommand = cli.Command{
 		}
 		utils.LogDebug(fmt.Sprintf("selected asset url %s", asset.DownloadUrl))
 
-		appPaths := core.ConstructAppPaths(config, appId, appName)
+		appPaths := core.ConstructAppPaths(config, appId)
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(fmt.Sprintf("application with id %s already exists", appId))
 			if !assumeYes {
@@ -130,7 +116,6 @@ var InstallGithubCommand = cli.Command{
 
 		utils.LogLn()
 		summary := utils.NewLogTable()
-		summary.Add(utils.LogRightArrowPrefix, "Name", color.CyanString(appName))
 		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.CyanString(appId))
 		summary.Add(utils.LogRightArrowPrefix, "Version", color.CyanString(release.TagName))
 		summary.Add(utils.LogRightArrowPrefix, "Filename", color.CyanString(asset.Name))
@@ -153,7 +138,6 @@ var InstallGithubCommand = cli.Command{
 
 		app := &core.AppConfig{
 			Id:      appId,
-			Name:    appName,
 			Version: release.TagName,
 			Source:  core.GithubSourceId,
 			Paths:   *appPaths,
@@ -162,7 +146,6 @@ var InstallGithubCommand = cli.Command{
 		installed, _ := InstallApps([]InstallableApp{{
 			App:    app,
 			Source: source,
-			Paths:  appPaths,
 			Asset:  asset.ToAsset(),
 		}})
 		if installed != 1 {
@@ -174,7 +157,7 @@ var InstallGithubCommand = cli.Command{
 			fmt.Sprintf(
 				"%s Installed %s successfully!",
 				utils.LogTickPrefix,
-				color.CyanString(app.Name),
+				color.CyanString(app.Id),
 			),
 		)
 

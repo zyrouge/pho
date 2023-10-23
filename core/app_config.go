@@ -3,13 +3,13 @@ package core
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/zyrouge/pho/utils"
 )
 
 type AppConfig struct {
 	Id      string   `json:"Id"`
-	Name    string   `json:"Name"`
 	Version string   `json:"Version"`
 	Source  SourceId `json:"Source"`
 	Paths   AppPaths `json:"Paths"`
@@ -18,12 +18,12 @@ type AppConfig struct {
 type SourceId string
 
 type AppPaths struct {
-	Dir          string
-	Config       string
-	SourceConfig string
-	AppImage     string
-	Icon         string
-	Desktop      string
+	Dir          string `json:"Dir"`
+	Config       string `json:"Config"`
+	SourceConfig string `json:"SourceConfig"`
+	AppImage     string `json:"AppImage"`
+	Icon         string `json:"Icon"`
+	Desktop      string `json:"Desktop"`
 }
 
 func ReadAppConfig(configPath string) (*AppConfig, error) {
@@ -32,13 +32,25 @@ func ReadAppConfig(configPath string) (*AppConfig, error) {
 		return nil, err
 	}
 	// TODO: remove this in future versions
-	// patch this temporarily to not break on user
+	// patched this temporarily to not break on user
 	if appConfig.Paths.AppImage == "" {
 		config, err := ReadConfig()
 		if err != nil {
 			return nil, err
 		}
-		appConfig.Paths = *ConstructAppPaths(config, appConfig.Id, appConfig.Name)
+		appConfig.Paths = *ConstructAppPaths(config, appConfig.Id)
+		appConfig.Paths.Config = strings.Replace(
+			appConfig.Paths.Config,
+			".pho.json",
+			".zap.json",
+			1,
+		)
+		appConfig.Paths.SourceConfig = strings.Replace(
+			appConfig.Paths.SourceConfig,
+			".pho.json",
+			".zap.json",
+			1,
+		)
 	}
 	return appConfig, nil
 }
@@ -55,21 +67,19 @@ func ConstructAppId(appName string) string {
 	return utils.CleanId(appName)
 }
 
-func ConstructAppName(appName string) string {
-	return utils.CleanName(appName)
-}
-func ConstructAppPaths(config *Config, appId string, appName string) *AppPaths {
+func ConstructAppPaths(config *Config, appId string) *AppPaths {
 	appDir := path.Join(config.AppsDir, appId)
-	cleanAppName := utils.CleanText(appName)
-	if cleanAppName == "" {
-		cleanAppName = appId
-	}
 	return &AppPaths{
 		Dir:          appDir,
-		Config:       path.Join(appDir, "config.zap.json"),
-		SourceConfig: path.Join(appDir, "source.config.zap.json"),
-		AppImage:     path.Join(appDir, fmt.Sprintf("%s.AppImage", cleanAppName)),
-		Icon:         path.Join(appDir, fmt.Sprintf("%s.png", cleanAppName)),
+		Config:       path.Join(appDir, "config.pho.json"),
+		SourceConfig: path.Join(appDir, "source.config.pho.json"),
+		AppImage:     path.Join(appDir, fmt.Sprintf("%s.AppImage", appId)),
+		Icon:         path.Join(appDir, fmt.Sprintf("%s.png", appId)),
 		Desktop:      path.Join(config.DesktopDir, fmt.Sprintf("%s.desktop", appId)),
 	}
+}
+
+func ConstructAppConfigPath(config *Config, appId string) string {
+	appPaths := ConstructAppPaths(config, appId)
+	return appPaths.Config
 }

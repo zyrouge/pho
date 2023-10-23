@@ -46,22 +46,22 @@ func (source *GithubSource) SupportUpdates() bool {
 	return true
 }
 
-func (source *GithubSource) CheckUpdate(app *AppConfig) (bool, *SourceUpdate, error) {
+func (source *GithubSource) CheckUpdate(app *AppConfig, reinstall bool) (*SourceUpdate, error) {
 	release, err := source.FetchAptLatestRelease()
 	if err != nil {
-		return false, nil, err
+		return nil, err
 	}
-	if app.Version == release.TagName {
-		return false, nil, nil
+	if app.Version == release.TagName && !reinstall {
+		return nil, nil
 	}
 	matchScore, asset := release.ChooseAptAsset()
 	if matchScore == AppImageAssetNoMatch {
-		return false, nil, fmt.Errorf("no valid asset in github tag %s", release.TagName)
+		return nil, fmt.Errorf("no valid asset in github tag %s", release.TagName)
 	}
 	update := &SourceUpdate{
 		Version:    release.TagName,
 		MatchScore: matchScore,
 		Asset:      asset.ToAsset(),
 	}
-	return true, update, nil
+	return update, nil
 }

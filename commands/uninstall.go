@@ -55,8 +55,8 @@ var UninstallCommand = cli.Command{
 				)
 				continue
 			}
-			appPaths := core.ConstructAppPaths(config, appId, "")
-			app, err := core.ReadAppConfig(appPaths.Config)
+			appConfigPath := core.ConstructAppConfigPath(config, appId)
+			app, err := core.ReadAppConfig(appConfigPath)
 			if err != nil {
 				failed++
 				utils.LogError(err)
@@ -76,7 +76,6 @@ var UninstallCommand = cli.Command{
 		summary.Add(
 			headingColor.Sprint("Index"),
 			headingColor.Sprint("Application ID"),
-			headingColor.Sprint("Application Name"),
 			headingColor.Sprint("Version"),
 		)
 		i := 0
@@ -85,7 +84,6 @@ var UninstallCommand = cli.Command{
 			summary.Add(
 				fmt.Sprintf("%d.", i),
 				color.RedString(x.Id),
-				color.RedString(x.Name),
 				x.Version,
 			)
 		}
@@ -106,8 +104,7 @@ var UninstallCommand = cli.Command{
 		utils.LogLn()
 		failed = 0
 		for _, x := range uninstallables {
-			appPaths := core.ConstructAppPaths(config, x.Id, x.Name)
-			failed += UninstallApp(&x, appPaths)
+			failed += UninstallApp(&x)
 		}
 		if failed > 0 {
 			utils.LogLn()
@@ -133,7 +130,7 @@ var UninstallCommand = cli.Command{
 	},
 }
 
-func UninstallApp(app *core.AppConfig, appPaths *core.AppPaths) int {
+func UninstallApp(app *core.AppConfig) int {
 	failed := 0
 	config, err := core.ReadConfig()
 	if err != nil {
@@ -146,18 +143,18 @@ func UninstallApp(app *core.AppConfig, appPaths *core.AppPaths) int {
 			failed++
 		}
 	}
-	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Dir))
-	if err = os.RemoveAll(appPaths.Dir); err != nil {
+	utils.LogDebug(fmt.Sprintf("removing %s", app.Paths.Dir))
+	if err = os.RemoveAll(app.Paths.Dir); err != nil {
 		utils.LogError(err)
 		failed++
 	}
-	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Desktop))
-	if err = core.UninstallDesktopFile(appPaths.Desktop); err != nil {
+	utils.LogDebug(fmt.Sprintf("removing %s", app.Paths.Desktop))
+	if err = core.UninstallDesktopFile(app.Paths.Desktop); err != nil {
 		utils.LogError(err)
 		failed++
 	}
-	utils.LogDebug(fmt.Sprintf("removing %s", appPaths.Desktop))
-	if err = os.Remove(appPaths.Desktop); err != nil {
+	utils.LogDebug(fmt.Sprintf("removing %s", app.Paths.Desktop))
+	if err = os.Remove(app.Paths.Desktop); err != nil {
 		utils.LogError(err)
 		failed++
 	}

@@ -18,6 +18,6 @@ func (*LocalSource) SupportUpdates() bool {
 	return false
 }
 
-func (*LocalSource) CheckUpdate(app *AppConfig) (bool, *SourceUpdate, error) {
-	return false, nil, errors.New("local source does not support updates")
+func (*LocalSource) CheckUpdate(app *AppConfig, reinstall bool) (*SourceUpdate, error) {
+	return nil, errors.New("local source does not support updates")
 }

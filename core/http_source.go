@@ -18,6 +18,6 @@ func (*HttpSource) SupportsUpdates() bool {
 	return false
 }
 
-func (*HttpSource) CheckUpdate(app *AppConfig) (bool, *SourceUpdate, error) {
-	return false, nil, errors.New("http source does not support updates")
+func (*HttpSource) CheckUpdate(app *AppConfig, reinstall bool) (*SourceUpdate, error) {
+	return nil, errors.New("http source does not support updates")
 }

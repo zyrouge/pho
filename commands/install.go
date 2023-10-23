@@ -43,7 +43,6 @@ const (
 type InstallableApp struct {
 	App    *core.AppConfig
 	Source any
-	Paths  *core.AppPaths
 	Asset  *core.Asset
 
 	Index      int
@@ -74,20 +73,18 @@ func (x *InstallableApp) PrintStatus() {
 	switch x.Status {
 	case InstallableAppFailed:
 		fmt.Printf(
-			"%s %s %s %s %s\n",
+			"%s %s %s %s\n",
 			prefix,
 			utils.LogExclamationPrefix,
-			color.RedString(x.App.Name),
 			x.App.Version,
 			suffix,
 		)
 
 	case InstallableAppDownloading:
 		fmt.Printf(
-			"%s %s %s %s (%s / %s) %s\n",
+			"%s %s %s (%s / %s) %s\n",
 			prefix,
 			color.YellowString(utils.TerminalLoadingSymbol(x.PrintCycle)),
-			color.CyanString(x.App.Name),
 			x.App.Version,
 			prettyBytes(x.Progress),
 			prettyBytes(x.Asset.Size),
@@ -96,20 +93,18 @@ func (x *InstallableApp) PrintStatus() {
 
 	case InstallableAppIntegrating:
 		fmt.Printf(
-			"%s %s %s %s %s\n",
+			"%s %s %s %s\n",
 			prefix,
 			color.YellowString(utils.TerminalLoadingSymbol(x.PrintCycle)),
-			color.CyanString(x.App.Name),
 			x.App.Version,
 			suffix,
 		)
 
 	case InstallableAppInstalled:
 		fmt.Printf(
-			"%s %s %s %s %s\n",
+			"%s %s %s %s\n",
 			prefix,
 			utils.LogTickPrefix,
-			color.GreenString(x.App.Name),
 			x.App.Version,
 			suffix,
 		)
@@ -140,8 +135,8 @@ func InstallApps(apps []InstallableApp) (int, int) {
 		x.PrintStatus()
 		core.UpdateTransactions(func(transactions *core.Transactions) error {
 			transactions.PendingInstallations[x.App.Id] = core.PendingInstallation{
-				InvolvedDirs:  []string{x.Paths.Dir},
-				InvolvedFiles: []string{x.Paths.Desktop},
+				InvolvedDirs:  []string{x.App.Paths.Dir},
+				InvolvedFiles: []string{x.App.Paths.Desktop},
 			}
 			return nil
 		})
@@ -180,13 +175,13 @@ func (x *InstallableApp) Install() error {
 }
 
 func (x *InstallableApp) Download() error {
-	if err := os.MkdirAll(x.Paths.Dir, os.ModePerm); err != nil {
+	if err := os.MkdirAll(x.App.Paths.Dir, os.ModePerm); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(path.Dir(x.Paths.Desktop), os.ModePerm); err != nil {
+	if err := os.MkdirAll(path.Dir(x.App.Paths.Desktop), os.ModePerm); err != nil {
 		return err
 	}
-	tempFile, err := utils.CreateTempFile(x.Paths.AppImage)
+	tempFile, err := utils.CreateTempFile(x.App.Paths.AppImage)
 	if err != nil {
 		return err
 	}
@@ -201,19 +196,19 @@ func (x *InstallableApp) Download() error {
 	if err != nil {
 		return err
 	}
-	if err = os.Rename(tempFile.Name(), x.Paths.AppImage); err != nil {
+	if err = os.Rename(tempFile.Name(), x.App.Paths.AppImage); err != nil {
 		return err
 	}
-	return os.Chmod(x.Paths.AppImage, 0755)
+	return os.Chmod(x.App.Paths.AppImage, 0755)
 }
 
 func (x *InstallableApp) Integrate() error {
-	tempDir := path.Join(x.Paths.Dir, "temp")
+	tempDir := path.Join(x.App.Paths.Dir, "temp")
 	err := os.Mkdir(tempDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	deflated, err := core.DeflateAppImage(x.Paths.AppImage, tempDir)
+	deflated, err := core.DeflateAppImage(x.App.Paths.AppImage, tempDir)
 	if err != nil {
 		return err
 	}
@@ -222,27 +217,27 @@ func (x *InstallableApp) Integrate() error {
 	if err != nil {
 		return err
 	}
-	if err = metadata.CopyIconFile(x.Paths); err != nil {
+	if err = metadata.CopyIconFile(&x.App.Paths); err != nil {
 		return err
 	}
-	if err = metadata.InstallDesktopFile(x.Paths); err != nil {
+	if err = metadata.InstallDesktopFile(&x.App.Paths); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (x *InstallableApp) SaveConfig() error {
-	if err := core.SaveAppConfig(x.Paths.Config, x.App); err != nil {
+	if err := core.SaveAppConfig(x.App.Paths.Config, x.App); err != nil {
 		return err
 	}
-	if err := core.SaveSourceConfig[any](x.Paths.SourceConfig, x.Source); err != nil {
+	if err := core.SaveSourceConfig[any](x.App.Paths.SourceConfig, x.Source); err != nil {
 		return err
 	}
 	config, err := core.ReadConfig()
 	if err != nil {
 		return err
 	}
-	config.Installed[x.App.Id] = x.Paths.Dir
+	config.Installed[x.App.Id] = x.App.Paths.Dir
 	return core.SaveConfig(config)
 }
 

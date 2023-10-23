@@ -36,6 +36,7 @@ func main() {
 			&commands.ViewCommand,
 			&commands.TidyBrokenCommand,
 			&commands.SelfUpdateCommand,
+			&commands.AppConfigCommand,
 		},
 	}
 

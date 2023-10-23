@@ -23,10 +23,6 @@ var InstallHttpCommand = cli.Command{
 			Usage: "Application identifier",
 		},
 		&cli.StringFlag{
-			Name:  "name",
-			Usage: "Application name",
-		},
-		&cli.StringFlag{
 			Name:  "version",
 			Usage: "Application version",
 		},
@@ -53,12 +49,10 @@ var InstallHttpCommand = cli.Command{
 
 		url := args.Get(0)
 		appId := ctx.String("id")
-		appName := ctx.String("name")
 		appVersion := ctx.String("version")
 		assumeYes := ctx.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
-		utils.LogDebug(fmt.Sprintf("argument name: %s", appName))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
 		if url == "" {
@@ -83,29 +77,11 @@ var InstallHttpCommand = cli.Command{
 			return errors.New("invalid application id")
 		}
 
-		if appName == "" {
-			appName = core.ConstructAppName(appId)
-			if !assumeYes {
-				appName, err = utils.PromptTextInput(
-					reader,
-					"What is name of the Application?",
-					appName,
-				)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		appName = utils.CleanText(appName)
-		if appName == "" {
-			return errors.New("invalid application name")
-		}
-
 		if appVersion == "" {
 			appVersion = "0.0.0"
 		}
 
-		appPaths := core.ConstructAppPaths(config, appId, appName)
+		appPaths := core.ConstructAppPaths(config, appId)
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(
 				fmt.Sprintf(
@@ -127,7 +103,6 @@ var InstallHttpCommand = cli.Command{
 
 		utils.LogLn()
 		summary := utils.NewLogTable()
-		summary.Add(utils.LogRightArrowPrefix, "Name", color.CyanString(appName))
 		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.CyanString(appId))
 		summary.Add(utils.LogRightArrowPrefix, "Version", color.CyanString(appVersion))
 		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(appPaths.AppImage))
@@ -153,7 +128,6 @@ var InstallHttpCommand = cli.Command{
 
 		app := &core.AppConfig{
 			Id:      appId,
-			Name:    appName,
 			Version: appVersion,
 			Source:  core.HttpSourceId,
 			Paths:   *appPaths,
@@ -169,7 +143,6 @@ var InstallHttpCommand = cli.Command{
 		installed, _ := InstallApps([]InstallableApp{{
 			App:    app,
 			Source: source,
-			Paths:  appPaths,
 			Asset:  asset,
 		}})
 		if installed != 1 {
@@ -181,7 +154,7 @@ var InstallHttpCommand = cli.Command{
 			fmt.Sprintf(
 				"%s Installed %s successfully!",
 				utils.LogTickPrefix,
-				color.CyanString(app.Name),
+				color.CyanString(app.Id),
 			),
 		)
 

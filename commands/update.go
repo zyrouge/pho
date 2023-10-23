@@ -22,6 +22,10 @@ var UpdateCommand = cli.Command{
 			Aliases: []string{"y"},
 			Usage:   "Automatically answer yes for questions",
 		},
+		&cli.BoolFlag{
+			Name:  "reinstall",
+			Usage: "Forcefully update and reinstall application",
+		},
 	},
 	Action: func(ctx *cli.Context) error {
 		config, err := core.GetConfig()
@@ -34,8 +38,10 @@ var UpdateCommand = cli.Command{
 
 		appIds := args.Slice()
 		assumeYes := ctx.Bool("assume-yes")
+		reinstall := ctx.Bool("reinstall")
 		utils.LogDebug(fmt.Sprintf("argument ids: %s", strings.Join(appIds, ", ")))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
+		utils.LogDebug(fmt.Sprintf("argument reinstall: %v", reinstall))
 
 		if len(appIds) == 0 {
 			for x := range config.Installed {
@@ -43,15 +49,12 @@ var UpdateCommand = cli.Command{
 			}
 		}
 
-		utils.LogLn()
-		updateables, failed, err := CheckAppUpdates(config, appIds)
+		updateables, _, err := CheckAppUpdates(config, appIds, reinstall)
 		if err != nil {
 			return err
 		}
-		if failed > 0 {
-			utils.LogLn()
-		}
 		if len(updateables) == 0 {
+			utils.LogLn()
 			utils.LogInfo(
 				fmt.Sprintf(
 					"%s Everything is up-to-date.",
@@ -61,12 +64,12 @@ var UpdateCommand = cli.Command{
 			return nil
 		}
 
+		utils.LogLn()
 		summary := utils.NewLogTable()
 		headingColor := color.New(color.Underline, color.Bold)
 		summary.Add(
 			headingColor.Sprint("Index"),
 			headingColor.Sprint("Application ID"),
-			headingColor.Sprint("Application Name"),
 			headingColor.Sprint("Old Version"),
 			headingColor.Sprint("New Version"),
 		)
@@ -76,7 +79,6 @@ var UpdateCommand = cli.Command{
 			summary.Add(
 				fmt.Sprintf("%d.", i),
 				color.CyanString(x.App.Id),
-				color.CyanString(x.App.Name),
 				x.App.Version,
 				color.CyanString(x.Update.Version),
 			)
@@ -102,7 +104,6 @@ var UpdateCommand = cli.Command{
 			installables = append(installables, InstallableApp{
 				App:    x.App,
 				Source: x.Source,
-				Paths:  x.Paths,
 				Asset:  x.Update.Asset,
 			})
 		}
@@ -135,15 +136,14 @@ var UpdateCommand = cli.Command{
 type UpdatableApp struct {
 	App    *core.AppConfig
 	Source any
-	Paths  *core.AppPaths
 	Update *core.SourceUpdate
 }
 
-func CheckAppUpdates(config *core.Config, appIds []string) ([]UpdatableApp, int, error) {
+func CheckAppUpdates(config *core.Config, appIds []string, reinstall bool) ([]UpdatableApp, int, error) {
 	failed := 0
 	apps := []UpdatableApp{}
 	for _, appId := range appIds {
-		updatable, err := CheckAppUpdate(config, appId)
+		updatable, err := CheckAppUpdate(config, appId, reinstall)
 		if err != nil {
 			failed++
 			utils.LogError(err)
@@ -156,20 +156,19 @@ func CheckAppUpdates(config *core.Config, appIds []string) ([]UpdatableApp, int,
 	return apps, failed, nil
 }
 
-func CheckAppUpdate(config *core.Config, appId string) (*UpdatableApp, error) {
+func CheckAppUpdate(config *core.Config, appId string, reinstall bool) (*UpdatableApp, error) {
 	if _, ok := config.Installed[appId]; !ok {
 		return nil, fmt.Errorf(
 			"application with id %s is not installed",
 			color.CyanString(appId),
 		)
 	}
-	appPaths := core.ConstructAppPaths(config, appId, "")
-	app, err := core.ReadAppConfig(appPaths.Config)
+	appConfigPath := core.ConstructAppConfigPath(config, appId)
+	app, err := core.ReadAppConfig(appConfigPath)
 	if err != nil {
 		return nil, err
 	}
-	appPaths = core.ConstructAppPaths(config, appId, app.Name)
-	sourceConfig, err := core.ReadSourceConfig(app.Source, appPaths.SourceConfig)
+	sourceConfig, err := core.ReadSourceConfig(app.Source, app.Paths.SourceConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -180,17 +179,16 @@ func CheckAppUpdate(config *core.Config, appId string) (*UpdatableApp, error) {
 	if !source.SupportUpdates() {
 		return nil, nil
 	}
-	hasUpdate, update, err := source.CheckUpdate(app)
+	update, err := source.CheckUpdate(app, reinstall)
 	if err != nil {
 		return nil, err
 	}
-	if !hasUpdate {
-		return nil, err
+	if update == nil {
+		return nil, nil
 	}
 	updatable := &UpdatableApp{
 		App:    app,
 		Source: sourceConfig,
-		Paths:  appPaths,
 		Update: update,
 	}
 	return updatable, nil

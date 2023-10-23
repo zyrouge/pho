@@ -41,8 +41,8 @@ var RunCommand = cli.Command{
 			)
 		}
 
-		appPaths := core.ConstructAppPaths(config, appId, "")
-		app, err := core.ReadAppConfig(appPaths.Config)
+		appConfigPath := core.ConstructAppConfigPath(config, appId)
+		app, err := core.ReadAppConfig(appConfigPath)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ var RunCommand = cli.Command{
 			fmt.Sprintf(
 				"%s Launched %s successfully!",
 				utils.LogTickPrefix,
-				color.CyanString(app.Name),
+				color.CyanString(app.Id),
 			),
 		)
 

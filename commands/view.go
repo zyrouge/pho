@@ -38,15 +38,14 @@ var ViewCommand = cli.Command{
 			)
 		}
 
-		tempAppPaths := core.ConstructAppPaths(config, appId, "")
-		app, err := core.ReadAppConfig(tempAppPaths.Config)
+		appConfigPath := core.ConstructAppConfigPath(config, appId)
+		app, err := core.ReadAppConfig(appConfigPath)
 		if err != nil {
 			return err
 		}
 
 		utils.LogLn()
 		summary := utils.NewLogTable()
-		summary.Add(utils.LogRightArrowPrefix, "Name", color.CyanString(app.Name))
 		summary.Add(utils.LogRightArrowPrefix, "Identifier", color.CyanString(app.Id))
 		summary.Add(utils.LogRightArrowPrefix, "Version", color.CyanString(app.Version))
 		summary.Add(utils.LogRightArrowPrefix, "Source", color.CyanString(string(app.Source)))

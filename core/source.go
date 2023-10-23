@@ -4,7 +4,7 @@ import "errors"
 
 type Source interface {
 	SupportUpdates() bool
-	CheckUpdate(app *AppConfig) (bool, *SourceUpdate, error)
+	CheckUpdate(app *AppConfig, reinstall bool) (*SourceUpdate, error)
 }
 
 type SourceUpdate struct {

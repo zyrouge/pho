@@ -95,7 +95,10 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 	if err != nil {
 		return err
 	}
-	content := string(bytes)
+	return InstallDesktopFile(paths, string(bytes))
+}
+
+func InstallDesktopFile(paths *AppPaths, content string) error {
 	content = desktopFileExecRegex.ReplaceAllLiteralString(
 		content,
 		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(paths.AppImage)),
@@ -105,7 +108,7 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 		fmt.Sprintf("Icon=%s", utils.QuotedWhenSpace(paths.Icon)),
 	)
 	content = strings.TrimSpace(content)
-	if err = os.WriteFile(paths.Desktop, []byte(content), os.ModePerm); err != nil {
+	if err := os.WriteFile(paths.Desktop, []byte(content), os.ModePerm); err != nil {
 		return err
 	}
 	cmd := exec.Command("xdg-desktop-menu", "install", paths.Desktop, "--novendor")
