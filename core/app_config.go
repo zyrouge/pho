@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/zyrouge/pho/utils"
 )
@@ -27,32 +26,7 @@ type AppPaths struct {
 }
 
 func ReadAppConfig(configPath string) (*AppConfig, error) {
-	appConfig, err := utils.ReadJsonFile[AppConfig](configPath)
-	if err != nil {
-		return nil, err
-	}
-	// TODO: remove this in future versions
-	// patched this temporarily to not break on user
-	if appConfig.Paths.AppImage == "" {
-		config, err := ReadConfig()
-		if err != nil {
-			return nil, err
-		}
-		appConfig.Paths = *ConstructAppPaths(config, appConfig.Id)
-		appConfig.Paths.Config = strings.Replace(
-			appConfig.Paths.Config,
-			".pho.json",
-			".zap.json",
-			1,
-		)
-		appConfig.Paths.SourceConfig = strings.Replace(
-			appConfig.Paths.SourceConfig,
-			".pho.json",
-			".zap.json",
-			1,
-		)
-	}
-	return appConfig, nil
+	return utils.ReadJsonFile[AppConfig](configPath)
 }
 
 func SaveAppConfig(configPath string, config *AppConfig) error {
