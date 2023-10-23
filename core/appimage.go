@@ -9,6 +9,8 @@ import (
 	"path"
 	"regexp"
 	"strings"
+
+	"github.com/zyrouge/pho/utils"
 )
 
 type DeflatedAppImage struct {
@@ -85,7 +87,8 @@ func (metadata *DeflatedAppImageMetadata) CopyIconFile(paths *AppPaths) error {
 	return err
 }
 
-var desktopFileIconRegex = regexp.MustCompile(`Icon=[^\n]+\n?`)
+var desktopFileExecRegex = regexp.MustCompile(`Exec=("[^"]+"|[^ ]+)`)
+var desktopFileIconRegex = regexp.MustCompile(`Icon=[^\n]+`)
 
 func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) error {
 	bytes, err := os.ReadFile(metadata.DesktopPath)
@@ -93,15 +96,15 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 		return err
 	}
 	content := string(bytes)
-	content = strings.Replace(
+	content = desktopFileExecRegex.ReplaceAllLiteralString(
 		content,
-		"Exec=AppRun",
-		fmt.Sprintf("Exec=%s", paths.AppImage),
-		1,
+		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(paths.AppImage)),
 	)
-	content = desktopFileIconRegex.ReplaceAllLiteralString(content, "")
+	content = desktopFileIconRegex.ReplaceAllLiteralString(
+		content,
+		fmt.Sprintf("Icon=%s", utils.QuotedWhenSpace(paths.Icon)),
+	)
 	content = strings.TrimSpace(content)
-	content += fmt.Sprintf("\nIcon=%s", paths.Icon)
 	if err = os.WriteFile(paths.Desktop, []byte(content), os.ModePerm); err != nil {
 		return err
 	}
