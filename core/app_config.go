@@ -46,7 +46,7 @@ func ConstructAppPaths(config *Config, appId string) *AppPaths {
 	return &AppPaths{
 		Dir:          appDir,
 		Config:       path.Join(appDir, "config.pho.json"),
-		SourceConfig: path.Join(appDir, "source.config.pho.json"),
+		SourceConfig: path.Join(appDir, "source.pho.json"),
 		AppImage:     path.Join(appDir, fmt.Sprintf("%s.AppImage", appId)),
 		Icon:         path.Join(appDir, fmt.Sprintf("%s.png", appId)),
 		Desktop:      path.Join(config.DesktopDir, fmt.Sprintf("%s.desktop", appId)),
