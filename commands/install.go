@@ -73,18 +73,20 @@ func (x *InstallableApp) PrintStatus() {
 	switch x.Status {
 	case InstallableAppFailed:
 		fmt.Printf(
-			"%s %s %s %s\n",
+			"%s %s %s %s %s\n",
 			prefix,
 			utils.LogExclamationPrefix,
+			color.RedString(x.App.Id),
 			x.App.Version,
 			suffix,
 		)
 
 	case InstallableAppDownloading:
 		fmt.Printf(
-			"%s %s %s (%s / %s) %s\n",
+			"%s %s %s %s (%s / %s) %s\n",
 			prefix,
 			color.YellowString(utils.TerminalLoadingSymbol(x.PrintCycle)),
+			color.CyanString(x.App.Id),
 			x.App.Version,
 			prettyBytes(x.Progress),
 			prettyBytes(x.Asset.Size),
@@ -93,18 +95,20 @@ func (x *InstallableApp) PrintStatus() {
 
 	case InstallableAppIntegrating:
 		fmt.Printf(
-			"%s %s %s %s\n",
+			"%s %s %s %s %s\n",
 			prefix,
 			color.YellowString(utils.TerminalLoadingSymbol(x.PrintCycle)),
+			color.CyanString(x.App.Id),
 			x.App.Version,
 			suffix,
 		)
 
 	case InstallableAppInstalled:
 		fmt.Printf(
-			"%s %s %s %s\n",
+			"%s %s %s %s %s\n",
 			prefix,
 			utils.LogTickPrefix,
+			color.GreenString(x.App.Id),
 			x.App.Version,
 			suffix,
 		)
