@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
-	"syscall"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
@@ -15,8 +16,15 @@ import (
 
 var RunCommand = cli.Command{
 	Name:    "run",
-	Aliases: []string{"open", "launch"},
+	Aliases: []string{"launch"},
 	Usage:   "Run an application",
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:    "detached",
+			Aliases: []string{"d"},
+			Usage:   "Run as a detached process",
+		},
+	},
 	Action: func(ctx *cli.Context) error {
 		config, err := core.GetConfig()
 		if err != nil {
@@ -24,15 +32,23 @@ var RunCommand = cli.Command{
 		}
 
 		args := ctx.Args()
+		hasExecArgs := args.Get(1) == "--"
 		if args.Len() == 0 {
 			return errors.New("no application id specified")
 		}
-		if args.Len() > 1 {
+		if args.Len() > 1 && !hasExecArgs {
 			return errors.New("unexpected excessive arguments")
 		}
 
 		appId := args.Get(0)
+		execArgs := []string{}
+		if hasExecArgs {
+			execArgs = args.Slice()[2:]
+		}
+		detached := ctx.Bool("detached")
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
+		utils.LogDebug(fmt.Sprintf("argument exec-args: %s", strings.Join(execArgs, " ")))
+		utils.LogDebug(fmt.Sprintf("argument detached: %v", detached))
 
 		if _, ok := config.Installed[appId]; !ok {
 			return fmt.Errorf(
@@ -47,48 +63,37 @@ var RunCommand = cli.Command{
 			return err
 		}
 
-		stdin, err := os.Open(os.DevNull)
-		if err != nil {
-			return err
-		}
-		stdout, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
-		if err != nil {
-			return err
-		}
-		stderr, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
-		if err != nil {
-			return err
+		execPath := app.Paths.AppImage
+		execDir := path.Dir(execPath)
+		if detached {
+			detachedOptions := &utils.StartDetachedProcessOptions{
+				Dir:  execDir,
+				Exec: execPath,
+				Args: execArgs,
+			}
+			if err = utils.StartDetachedProcess(detachedOptions); err != nil {
+				return err
+			}
+
+			utils.LogLn()
+			utils.LogInfo(
+				fmt.Sprintf(
+					"%s Launched %s successfully!",
+					utils.LogTickPrefix,
+					color.CyanString(app.Id),
+				),
+			)
+			return nil
 		}
 
-		procAttr := &os.ProcAttr{
-			Dir: path.Dir(app.Paths.AppImage),
-			Env: os.Environ(),
-			Files: []*os.File{
-				stdin,
-				stdout,
-				stderr,
-			},
-			Sys: &syscall.SysProcAttr{
-				Foreground: true,
-			},
-		}
-		proc, err := os.StartProcess(app.Paths.AppImage, []string{}, procAttr)
-		if err != nil {
+		cmd := exec.Command(execPath)
+		cmd.Dir = execDir
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err = cmd.Run(); err != nil {
 			return err
 		}
-		if err = proc.Release(); err != nil {
-			return err
-		}
-
-		utils.LogLn()
-		utils.LogInfo(
-			fmt.Sprintf(
-				"%s Launched %s successfully!",
-				utils.LogTickPrefix,
-				color.CyanString(app.Id),
-			),
-		)
-
 		return nil
 	},
 }

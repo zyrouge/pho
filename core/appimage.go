@@ -22,8 +22,7 @@ type DeflatedAppImage struct {
 func DeflateAppImage(appImagePath string, parentDir string) (*DeflatedAppImage, error) {
 	cmd := exec.Command(appImagePath, "--appimage-extract")
 	cmd.Dir = parentDir
-	err := cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		return nil, err
 	}
 	appDir := path.Join(parentDir, "squashfs-root")
