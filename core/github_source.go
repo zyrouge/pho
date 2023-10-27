@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/zyrouge/pho/utils"
@@ -8,11 +9,18 @@ import (
 
 const GithubSourceId SourceId = "github"
 
+type GithubSourceRelease string
+
+const (
+	GithubSourceReleaseLatest     GithubSourceRelease = "latest"
+	GithubSourceReleasePreRelease GithubSourceRelease = "prerelease"
+	GithubSourceReleaseAny        GithubSourceRelease = "any"
+)
+
 type GithubSource struct {
-	UserName   string `json:"UserName"`
-	RepoName   string `json:"RepoName"`
-	PreRelease bool   `json:"PreRelease"`
-	TagName    string `json:"TagName"`
+	UserName string              `json:"UserName"`
+	RepoName string              `json:"RepoName"`
+	Release  GithubSourceRelease `json:"Release"`
 }
 
 func ReadGithubSourceConfig(configPath string) (*GithubSource, error) {
@@ -20,17 +28,23 @@ func ReadGithubSourceConfig(configPath string) (*GithubSource, error) {
 }
 
 func (source *GithubSource) FetchAptRelease() (*GithubApiRelease, error) {
-	if source.TagName != "" {
-		return GithubApiFetchTaggedRelease(source.UserName, source.RepoName, source.TagName)
-	}
 	return source.FetchAptLatestRelease()
 }
 
 func (source *GithubSource) FetchAptLatestRelease() (*GithubApiRelease, error) {
-	if source.PreRelease {
+	switch source.Release {
+	case GithubSourceReleaseLatest:
+		return GithubApiFetchLatestRelease(source.UserName, source.RepoName)
+
+	case GithubSourceReleasePreRelease:
 		return GithubApiFetchLatestPreRelease(source.UserName, source.RepoName)
+
+	case GithubSourceReleaseAny:
+		return GithubApiFetchLatestAny(source.UserName, source.RepoName)
+
+	default:
+		return nil, errors.New("invalid github source release type")
 	}
-	return GithubApiFetchLatestRelease(source.UserName, source.RepoName)
 }
 
 func (release *GithubApiRelease) ChooseAptAsset() (AppImageAssetMatch, *GithubApiReleaseAsset) {

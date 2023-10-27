@@ -13,6 +13,7 @@ type GithubApiRelease struct {
 	ApiUrl     string                  `json:"url"`
 	HtmlUrl    string                  `json:"html_url"`
 	TagName    string                  `json:"tag_name"`
+	Draft      bool                    `json:"draft"`
 	PreRelease bool                    `json:"prerelease"`
 	Assets     []GithubApiReleaseAsset `json:"assets"`
 }
@@ -42,6 +43,19 @@ func GithubApiFetchLatestPreRelease(username string, reponame string) (*GithubAp
 		}
 	}
 	return nil, errors.New("no prerelease found")
+}
+
+func GithubApiFetchLatestAny(username string, reponame string) (*GithubApiRelease, error) {
+	releases, err := GithubApiFetchReleases(username, reponame)
+	if err != nil {
+		return nil, err
+	}
+	for _, x := range *releases {
+		if !x.Draft {
+			return &x, nil
+		}
+	}
+	return nil, errors.New("no non-draft releases found")
 }
 
 func GithubApiFetchLatestRelease(username string, reponame string) (*GithubApiRelease, error) {

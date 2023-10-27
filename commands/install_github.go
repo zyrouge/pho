@@ -5,12 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v3"
 	"github.com/zyrouge/pho/core"
 	"github.com/zyrouge/pho/utils"
 )
+
+var githubSourceReleaseStrings = []string{
+	string(core.GithubSourceReleaseLatest),
+	string(core.GithubSourceReleasePreRelease),
+	string(core.GithubSourceReleaseAny),
+}
 
 var InstallGithubCommand = cli.Command{
 	Name:    "github",
@@ -22,13 +29,12 @@ var InstallGithubCommand = cli.Command{
 			Usage: "Application identifier",
 		},
 		&cli.StringFlag{
-			Name:  "tag",
-			Usage: "Tag name",
-		},
-		&cli.BoolFlag{
-			Name:  "prerelease",
-			Usage: "Select pre-release tags",
-			Value: false,
+			Name: "release",
+			Usage: fmt.Sprintf(
+				"Releases type such as %s",
+				strings.Join(githubSourceReleaseStrings, ", "),
+			),
+			Value: githubSourceReleaseStrings[0],
 		},
 		&cli.BoolFlag{
 			Name:    "assume-yes",
@@ -53,13 +59,11 @@ var InstallGithubCommand = cli.Command{
 
 		url := args.Get(0)
 		appId := ctx.String("id")
-		tagName := ctx.String("tag")
-		prerelease := ctx.Bool("prerelease")
+		releaseType := ctx.String("release")
 		assumeYes := ctx.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
-		utils.LogDebug(fmt.Sprintf("argument tag: %s", tagName))
-		utils.LogDebug(fmt.Sprintf("argument prerelease: %v", prerelease))
+		utils.LogDebug(fmt.Sprintf("argument release: %v", releaseType))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
 		isValidUrl, ghUsername, ghReponame := core.ParseGithubRepoUrl(url)
@@ -69,9 +73,12 @@ var InstallGithubCommand = cli.Command{
 		if !isValidUrl {
 			return errors.New("invalid github repo url")
 		}
+		if !utils.SliceContains(githubSourceReleaseStrings, releaseType) {
+			return errors.New("invalid github release type")
+		}
 
 		if appId == "" {
-			appId = core.ConstructAppId(fmt.Sprintf("%s-%s", ghUsername, ghReponame))
+			appId = core.ConstructAppId(ghReponame)
 		}
 		appId = utils.CleanId(appId)
 		if appId == "" {
@@ -79,10 +86,9 @@ var InstallGithubCommand = cli.Command{
 		}
 
 		source := &core.GithubSource{
-			UserName:   ghUsername,
-			RepoName:   ghReponame,
-			PreRelease: prerelease,
-			TagName:    tagName,
+			UserName: ghUsername,
+			RepoName: ghReponame,
+			Release:  core.GithubSourceRelease(releaseType),
 		}
 		release, err := source.FetchAptRelease()
 		if err != nil {
