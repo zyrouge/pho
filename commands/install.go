@@ -61,8 +61,10 @@ func (x *InstallableApp) Write(data []byte) (n int, err error) {
 }
 
 func (x *InstallableApp) logDebug(msg string) {
-	x.SkipCycleErase = true
-	utils.LogDebug(msg)
+	if utils.LogDebugEnabled {
+		x.SkipCycleErase = true
+		utils.LogDebug(msg)
+	}
 }
 
 func (x *InstallableApp) PrintStatus() {
