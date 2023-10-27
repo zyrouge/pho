@@ -45,7 +45,7 @@ var AppConfigSetIdCommand = cli.Command{
 			return errors.New("invalid application id")
 		}
 
-		fromAppConfigPath := core.ConstructAppConfigPath(config, fromAppId)
+		fromAppConfigPath := core.GetAppConfigPath(config, fromAppId)
 		app, err := core.ReadAppConfig(fromAppConfigPath)
 		if err != nil {
 			return err
@@ -55,7 +55,7 @@ var AppConfigSetIdCommand = cli.Command{
 		app.Id = toAppId
 		app.Paths = *toAppPaths
 		delete(config.Installed, fromAppId)
-		config.Installed[toAppId] = toAppPaths.Dir
+		config.Installed[toAppId] = toAppPaths.Config
 		if err = os.Rename(fromAppPaths.Dir, toAppPaths.Dir); err != nil {
 			return err
 		}

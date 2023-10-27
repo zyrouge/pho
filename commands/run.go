@@ -57,7 +57,7 @@ var RunCommand = cli.Command{
 			)
 		}
 
-		appConfigPath := core.ConstructAppConfigPath(config, appId)
+		appConfigPath := core.GetAppConfigPath(config, appId)
 		app, err := core.ReadAppConfig(appConfigPath)
 		if err != nil {
 			return err

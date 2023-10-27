@@ -163,7 +163,7 @@ func CheckAppUpdate(config *core.Config, appId string, reinstall bool) (*Updatab
 			color.CyanString(appId),
 		)
 	}
-	appConfigPath := core.ConstructAppConfigPath(config, appId)
+	appConfigPath := core.GetAppConfigPath(config, appId)
 	app, err := core.ReadAppConfig(appConfigPath)
 	if err != nil {
 		return nil, err

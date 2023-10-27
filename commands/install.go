@@ -241,7 +241,7 @@ func (x *InstallableApp) SaveConfig() error {
 	if err != nil {
 		return err
 	}
-	config.Installed[x.App.Id] = x.App.Paths.Dir
+	config.Installed[x.App.Id] = x.App.Paths.Config
 	return core.SaveConfig(config)
 }
 

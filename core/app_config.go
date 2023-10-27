@@ -53,7 +53,6 @@ func ConstructAppPaths(config *Config, appId string) *AppPaths {
 	}
 }
 
-func ConstructAppConfigPath(config *Config, appId string) string {
-	appPaths := ConstructAppPaths(config, appId)
-	return appPaths.Config
+func GetAppConfigPath(config *Config, appId string) string {
+	return config.Installed[appId]
 }
