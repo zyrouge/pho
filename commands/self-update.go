@@ -23,6 +23,12 @@ var SelfUpdateCommand = cli.Command{
 		if err != nil {
 			return err
 		}
+		if release.TagName == fmt.Sprintf("v%s", core.AppVersion) {
+			utils.LogInfo(
+				fmt.Sprintf("%s You are already on the latest version!", utils.LogTickPrefix),
+			)
+			return nil
+		}
 		arch := utils.GetSystemArch()
 		var asset *core.GithubApiReleaseAsset
 		for _, x := range release.Assets {
