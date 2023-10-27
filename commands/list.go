@@ -25,12 +25,11 @@ var ListCommand = cli.Command{
 		summary.Add(
 			headingColor.Sprint("Index"),
 			headingColor.Sprint("Application ID"),
-			headingColor.Sprint("Installed Path"),
 		)
 		i := 0
-		for appId, appDir := range config.Installed {
+		for appId := range config.Installed {
 			i++
-			summary.Add(fmt.Sprintf("%d.", i), color.CyanString(appId), appDir)
+			summary.Add(fmt.Sprintf("%d.", i), color.CyanString(appId))
 		}
 		summary.Print()
 		if i == 0 {
