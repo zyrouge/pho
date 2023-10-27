@@ -56,6 +56,7 @@ var UninstallCommand = cli.Command{
 				continue
 			}
 			appConfigPath := core.GetAppConfigPath(config, appId)
+			utils.LogDebug(fmt.Sprintf("reading app config from %s", appConfigPath))
 			app, err := core.ReadAppConfig(appConfigPath)
 			if err != nil {
 				failed++
@@ -132,12 +133,14 @@ var UninstallCommand = cli.Command{
 
 func UninstallApp(app *core.AppConfig) int {
 	failed := 0
+	utils.LogDebug("reading config")
 	config, err := core.ReadConfig()
 	if err != nil {
 		utils.LogError(err)
 		failed++
 	} else {
 		delete(config.Installed, app.Id)
+		utils.LogDebug("saving config")
 		if err = core.SaveConfig(config); err != nil {
 			utils.LogError(err)
 			failed++

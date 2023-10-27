@@ -16,6 +16,7 @@ var AppConfigSetIdCommand = cli.Command{
 	Name:  "set-id",
 	Usage: "Update an application's identifier",
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
@@ -33,6 +34,10 @@ var AppConfigSetIdCommand = cli.Command{
 		}
 
 		fromAppId := args.Get(0)
+		toAppId := args.Get(1)
+		utils.LogDebug(fmt.Sprintf("argument from-id: %v", fromAppId))
+		utils.LogDebug(fmt.Sprintf("argument to-id: %v", toAppId))
+
 		if _, ok := config.Installed[fromAppId]; !ok {
 			return fmt.Errorf(
 				"application with id %s is not installed",
@@ -40,12 +45,14 @@ var AppConfigSetIdCommand = cli.Command{
 			)
 		}
 
-		toAppId := core.ConstructAppId(args.Get(1))
+		toAppId = core.ConstructAppId(toAppId)
+		utils.LogDebug(fmt.Sprintf("clean to-id: %v", toAppId))
 		if toAppId == "" {
 			return errors.New("invalid application id")
 		}
 
 		fromAppConfigPath := core.GetAppConfigPath(config, fromAppId)
+		utils.LogDebug(fmt.Sprintf("reading app config from %s", fromAppConfigPath))
 		app, err := core.ReadAppConfig(fromAppConfigPath)
 		if err != nil {
 			return err
@@ -56,6 +63,7 @@ var AppConfigSetIdCommand = cli.Command{
 		app.Paths = *toAppPaths
 		delete(config.Installed, fromAppId)
 		config.Installed[toAppId] = toAppPaths.Config
+		utils.LogDebug(fmt.Sprintf("moving from %s to %s", fromAppPaths.Dir, toAppPaths.Dir))
 		if err = os.Rename(fromAppPaths.Dir, toAppPaths.Dir); err != nil {
 			return err
 		}
@@ -67,19 +75,24 @@ var AppConfigSetIdCommand = cli.Command{
 		if err = os.Rename(fromIconPath, toAppPaths.Icon); err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("saving app config to %s", toAppPaths.Config))
 		if err = core.SaveAppConfig(toAppPaths.Config, app); err != nil {
 			return err
 		}
+		utils.LogDebug("saving config")
 		if err = core.SaveConfig(config); err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("reading .desktop file at %s", fromAppPaths.Desktop))
 		desktopContent, err := os.ReadFile(fromAppPaths.Desktop)
 		if err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("uninstalling .desktop file at %s", fromAppPaths.Desktop))
 		if err = core.UninstallDesktopFile(fromAppPaths.Desktop); err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("installing .desktop file at %s", fromAppPaths.Desktop))
 		if err = core.InstallDesktopFile(toAppPaths, string(desktopContent)); err != nil {
 			return err
 		}

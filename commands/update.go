@@ -28,6 +28,7 @@ var UpdateCommand = cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
@@ -164,10 +165,12 @@ func CheckAppUpdate(config *core.Config, appId string, reinstall bool) (*Updatab
 		)
 	}
 	appConfigPath := core.GetAppConfigPath(config, appId)
+	utils.LogDebug(fmt.Sprintf("reading app config from %s", appConfigPath))
 	app, err := core.ReadAppConfig(appConfigPath)
 	if err != nil {
 		return nil, err
 	}
+	utils.LogDebug(fmt.Sprintf("reading app source config from %s", app.Paths.SourceConfig))
 	sourceConfig, err := core.ReadSourceConfig(app.Source, app.Paths.SourceConfig)
 	if err != nil {
 		return nil, err
@@ -177,6 +180,7 @@ func CheckAppUpdate(config *core.Config, appId string, reinstall bool) (*Updatab
 		return nil, err
 	}
 	if !source.SupportUpdates() {
+		utils.LogDebug(fmt.Sprintf("%s doesnt support any updates", appId))
 		return nil, nil
 	}
 	update, err := source.CheckUpdate(app, reinstall)
@@ -184,6 +188,7 @@ func CheckAppUpdate(config *core.Config, appId string, reinstall bool) (*Updatab
 		return nil, err
 	}
 	if update == nil {
+		utils.LogDebug(fmt.Sprintf("%s has no updates", appId))
 		return nil, nil
 	}
 	updatable := &UpdatableApp{

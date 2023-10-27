@@ -23,6 +23,7 @@ var TidyBrokenCommand = cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading transactions")
 		transactions, err := core.GetTransactions()
 		if err != nil {
 			return err
@@ -78,6 +79,7 @@ var TidyBrokenCommand = cli.Command{
 		removedFilesCount := 0
 		utils.LogLn()
 		for _, x := range involvedDirs {
+			utils.LogDebug(fmt.Sprintf("removing %s", x))
 			if err := os.RemoveAll(x); err != nil {
 				utils.LogError(err)
 				continue
@@ -85,6 +87,7 @@ var TidyBrokenCommand = cli.Command{
 			removedDirsCount++
 		}
 		for _, x := range involvedFiles {
+			utils.LogDebug(fmt.Sprintf("removing %s", x))
 			if err := os.Remove(x); err != nil {
 				utils.LogError(err)
 				continue

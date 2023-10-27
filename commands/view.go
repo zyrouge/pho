@@ -15,6 +15,7 @@ var ViewCommand = cli.Command{
 	Aliases: []string{},
 	Usage:   "View an installed application",
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
@@ -39,6 +40,7 @@ var ViewCommand = cli.Command{
 		}
 
 		appConfigPath := core.GetAppConfigPath(config, appId)
+		utils.LogDebug(fmt.Sprintf("reading app config from %s", appConfigPath))
 		app, err := core.ReadAppConfig(appConfigPath)
 		if err != nil {
 			return err

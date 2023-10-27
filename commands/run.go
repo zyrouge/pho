@@ -26,6 +26,7 @@ var RunCommand = cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
@@ -58,6 +59,7 @@ var RunCommand = cli.Command{
 		}
 
 		appConfigPath := core.GetAppConfigPath(config, appId)
+		utils.LogDebug(fmt.Sprintf("reading app config from %s", appConfigPath))
 		app, err := core.ReadAppConfig(appConfigPath)
 		if err != nil {
 			return err
@@ -65,6 +67,8 @@ var RunCommand = cli.Command{
 
 		execPath := app.Paths.AppImage
 		execDir := path.Dir(execPath)
+		utils.LogDebug(fmt.Sprintf("exec path as %s", execPath))
+		utils.LogDebug(fmt.Sprintf("exec dir as %s", execDir))
 		if detached {
 			detachedOptions := &utils.StartDetachedProcessOptions{
 				Dir:  execDir,

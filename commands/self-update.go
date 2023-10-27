@@ -18,6 +18,7 @@ var SelfUpdateCommand = cli.Command{
 	Aliases: []string{"self-upgrade"},
 	Usage:   fmt.Sprintf("Update %s", core.AppName),
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("fetching latest release")
 		release, err := core.GithubApiFetchLatestRelease(core.AppGithubOwner, core.AppGithubRepo)
 		if err != nil {
 			return err
@@ -36,6 +37,7 @@ var SelfUpdateCommand = cli.Command{
 			)
 		}
 		utils.LogInfo(fmt.Sprintf("Updating to version %s...", color.CyanString(release.TagName)))
+		utils.LogDebug(fmt.Sprintf("downloading from %s", asset.DownloadUrl))
 		data, err := http.Get(asset.DownloadUrl)
 		if err != nil {
 			return err
@@ -45,21 +47,26 @@ var SelfUpdateCommand = cli.Command{
 		if err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("current executable path as %s", executablePath))
 		tempFile, err := utils.CreateTempFile(executablePath)
 		if err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("created %s", tempFile.Name()))
 		defer tempFile.Close()
 		_, err = io.Copy(tempFile, data.Body)
 		if err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("removing %s", executablePath))
 		if err = os.Remove(executablePath); err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("renaming %s to %s", tempFile.Name(), executablePath))
 		if err = os.Rename(tempFile.Name(), executablePath); err != nil {
 			return err
 		}
+		utils.LogDebug(fmt.Sprintf("changing permissions of %s", executablePath))
 		if err = os.Chmod(executablePath, 0755); err != nil {
 			return err
 		}

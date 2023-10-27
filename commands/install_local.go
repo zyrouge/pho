@@ -32,6 +32,7 @@ var InstallLocalCommand = cli.Command{
 		},
 	},
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
@@ -87,6 +88,7 @@ var InstallLocalCommand = cli.Command{
 			}
 		}
 		appId = utils.CleanId(appId)
+		utils.LogDebug(fmt.Sprintf("clean id: %s", appId))
 		if appId == "" {
 			return errors.New("invalid application id")
 		}

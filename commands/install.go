@@ -45,12 +45,13 @@ type InstallableApp struct {
 	Source any
 	Asset  *core.Asset
 
-	Index      int
-	Count      int
-	StartedAt  int64
-	Progress   int64
-	PrintCycle int
-	Status     InstallableAppStatus
+	Index          int
+	Count          int
+	StartedAt      int64
+	Progress       int64
+	PrintCycle     int
+	SkipCycleErase bool
+	Status         InstallableAppStatus
 }
 
 func (x *InstallableApp) Write(data []byte) (n int, err error) {
@@ -59,9 +60,15 @@ func (x *InstallableApp) Write(data []byte) (n int, err error) {
 	return l, nil
 }
 
+func (x *InstallableApp) logDebug(msg string) {
+	x.SkipCycleErase = true
+	utils.LogDebug(msg)
+}
+
 func (x *InstallableApp) PrintStatus() {
-	if x.PrintCycle > 0 {
+	if x.PrintCycle > 0 && !x.SkipCycleErase {
 		utils.TerminalErasePreviousLine()
+		x.SkipCycleErase = false
 	}
 	x.PrintCycle++
 
@@ -69,7 +76,6 @@ func (x *InstallableApp) PrintStatus() {
 	suffix := color.HiBlackString(
 		fmt.Sprintf("(%s)", utils.HumanizeSeconds(utils.TimeNowSeconds()-x.StartedAt)),
 	)
-
 	switch x.Status {
 	case InstallableAppFailed:
 		fmt.Printf(
@@ -137,6 +143,7 @@ func InstallApps(apps []InstallableApp) (int, int) {
 		x.StartedAt = utils.TimeNowSeconds()
 		x.Status = InstallableAppDownloading
 		x.PrintStatus()
+		x.logDebug("updating transactions")
 		core.UpdateTransactions(func(transactions *core.Transactions) error {
 			transactions.PendingInstallations[x.App.Id] = core.PendingInstallation{
 				InvolvedDirs:  []string{x.App.Paths.Dir},
@@ -154,6 +161,7 @@ func InstallApps(apps []InstallableApp) (int, int) {
 			x.PrintStatus()
 			success++
 		}
+		x.logDebug("updating transactions")
 		core.UpdateTransactions(func(transactions *core.Transactions) error {
 			delete(transactions.PendingInstallations, x.App.Id)
 			return nil
@@ -179,9 +187,11 @@ func (x *InstallableApp) Install() error {
 }
 
 func (x *InstallableApp) Download() error {
+	x.logDebug(fmt.Sprintf("creating %s", x.App.Paths.Dir))
 	if err := os.MkdirAll(x.App.Paths.Dir, os.ModePerm); err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("creating %s", x.App.Paths.Desktop))
 	if err := os.MkdirAll(path.Dir(x.App.Paths.Desktop), os.ModePerm); err != nil {
 		return err
 	}
@@ -189,6 +199,7 @@ func (x *InstallableApp) Download() error {
 	if err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("created %s", tempFile.Name()))
 	defer tempFile.Close()
 	data, err := x.Asset.Download()
 	if err != nil {
@@ -200,18 +211,22 @@ func (x *InstallableApp) Download() error {
 	if err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("renaming %s to %s", tempFile.Name(), x.App.Paths.AppImage))
 	if err = os.Rename(tempFile.Name(), x.App.Paths.AppImage); err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("changing permissions of %s", x.App.Paths.AppImage))
 	return os.Chmod(x.App.Paths.AppImage, 0755)
 }
 
 func (x *InstallableApp) Integrate() error {
 	tempDir := path.Join(x.App.Paths.Dir, "temp")
+	x.logDebug(fmt.Sprintf("creating %s", tempDir))
 	err := os.Mkdir(tempDir, os.ModePerm)
 	if err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("deflating %s into %s", x.App.Paths.AppImage, tempDir))
 	deflated, err := core.DeflateAppImage(x.App.Paths.AppImage, tempDir)
 	if err != nil {
 		return err
@@ -221,9 +236,11 @@ func (x *InstallableApp) Integrate() error {
 	if err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("creating %s", x.App.Paths.Icon))
 	if err = metadata.CopyIconFile(&x.App.Paths); err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("installing .desktop file at %s", x.App.Paths.Desktop))
 	if err = metadata.InstallDesktopFile(&x.App.Paths); err != nil {
 		return err
 	}
@@ -231,9 +248,11 @@ func (x *InstallableApp) Integrate() error {
 }
 
 func (x *InstallableApp) SaveConfig() error {
+	x.logDebug(fmt.Sprintf("saving app config to %s", x.App.Paths.Config))
 	if err := core.SaveAppConfig(x.App.Paths.Config, x.App); err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("saving app source config to %s", x.App.Paths.SourceConfig))
 	if err := core.SaveSourceConfig[any](x.App.Paths.SourceConfig, x.Source); err != nil {
 		return err
 	}
@@ -242,6 +261,7 @@ func (x *InstallableApp) SaveConfig() error {
 		return err
 	}
 	config.Installed[x.App.Id] = x.App.Paths.Config
+	x.logDebug("saving config")
 	return core.SaveConfig(config)
 }
 

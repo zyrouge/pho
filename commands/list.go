@@ -14,6 +14,7 @@ var ListCommand = cli.Command{
 	Aliases: []string{"installed"},
 	Usage:   "List all installed applications",
 	Action: func(ctx *cli.Context) error {
+		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
