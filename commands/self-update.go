@@ -16,14 +16,23 @@ import (
 var SelfUpdateCommand = cli.Command{
 	Name:    "self-update",
 	Aliases: []string{"self-upgrade"},
-	Usage:   fmt.Sprintf("Update %s", core.AppName),
+	Flags: []cli.Flag{
+		&cli.BoolFlag{
+			Name:  "reinstall",
+			Usage: "Forcefully update",
+		},
+	},
+	Usage: fmt.Sprintf("Update %s", core.AppName),
 	Action: func(ctx *cli.Context) error {
+		reinstall := ctx.Bool("reinstall")
+		utils.LogDebug(fmt.Sprintf("argument reinstall: %v", reinstall))
+
 		utils.LogDebug("fetching latest release")
 		release, err := core.GithubApiFetchLatestRelease(core.AppGithubOwner, core.AppGithubRepo)
 		if err != nil {
 			return err
 		}
-		if release.TagName == fmt.Sprintf("v%s", core.AppVersion) {
+		if release.TagName == fmt.Sprintf("v%s", core.AppVersion) && !reinstall {
 			utils.LogInfo(
 				fmt.Sprintf("%s You are already on the latest version!", utils.LogTickPrefix),
 			)

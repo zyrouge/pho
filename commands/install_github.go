@@ -29,7 +29,8 @@ var InstallGithubCommand = cli.Command{
 			Usage: "Application identifier",
 		},
 		&cli.StringFlag{
-			Name: "release",
+			Name:    "release",
+			Aliases: []string{"r"},
 			Usage: fmt.Sprintf(
 				"Releases type such as %s",
 				strings.Join(githubSourceReleaseStrings, ", "),
