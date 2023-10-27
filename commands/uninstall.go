@@ -156,10 +156,5 @@ func UninstallApp(app *core.AppConfig) int {
 		utils.LogError(err)
 		failed++
 	}
-	utils.LogDebug(fmt.Sprintf("removing %s", app.Paths.Desktop))
-	if err = os.Remove(app.Paths.Desktop); err != nil {
-		utils.LogError(err)
-		failed++
-	}
 	return failed
 }
