@@ -51,6 +51,7 @@ var SelfUpdateCommand = cli.Command{
 				release.TagName,
 			)
 		}
+
 		utils.LogInfo(fmt.Sprintf("Updating to version %s...", color.CyanString(release.TagName)))
 		utils.LogDebug(fmt.Sprintf("downloading from %s", asset.DownloadUrl))
 		data, err := http.Get(asset.DownloadUrl)
