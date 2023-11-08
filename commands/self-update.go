@@ -40,7 +40,8 @@ var SelfUpdateCommand = cli.Command{
 		}
 		arch := utils.GetSystemArch()
 		var asset *core.GithubApiReleaseAsset
-		for _, x := range release.Assets {
+		for i := range release.Assets {
+			x := release.Assets[i]
 			if strings.HasSuffix(x.Name, arch) {
 				asset = &x
 				break
