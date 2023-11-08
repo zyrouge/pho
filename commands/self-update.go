@@ -43,6 +43,7 @@ var SelfUpdateCommand = cli.Command{
 		for _, x := range release.Assets {
 			if strings.HasSuffix(x.Name, arch) {
 				asset = &x
+				break
 			}
 		}
 		if asset == nil {
