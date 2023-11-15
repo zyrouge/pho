@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 
 	"github.com/fatih/color"
@@ -66,9 +65,13 @@ var RunCommand = cli.Command{
 		}
 
 		execPath := app.Paths.AppImage
-		execDir := path.Dir(execPath)
+		execDir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
 		utils.LogDebug(fmt.Sprintf("exec path as %s", execPath))
 		utils.LogDebug(fmt.Sprintf("exec dir as %s", execDir))
+
 		if detached {
 			detachedOptions := &utils.StartDetachedProcessOptions{
 				Dir:  execDir,
