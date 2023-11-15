@@ -66,7 +66,8 @@ func StartDetachedProcess(options *StartDetachedProcessOptions) error {
 			Foreground: true,
 		},
 	}
-	proc, err := os.StartProcess(options.Exec, options.Args, procAttr)
+	argv := append([]string{options.Exec}, options.Args...)
+	proc, err := os.StartProcess(options.Exec, argv, procAttr)
 	if err != nil {
 		return err
 	}

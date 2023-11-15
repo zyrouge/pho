@@ -99,3 +99,11 @@ var SelfUpdateCommand = cli.Command{
 		return nil
 	},
 }
+
+func needsSelfUpdate() bool {
+	release, err := core.GithubApiFetchLatestRelease(core.AppGithubOwner, core.AppGithubRepo)
+	if err != nil {
+		return false
+	}
+	return release.TagName != fmt.Sprintf("v%s", core.AppVersion)
+}

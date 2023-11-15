@@ -44,6 +44,17 @@ var UpdateCommand = cli.Command{
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 		utils.LogDebug(fmt.Sprintf("argument reinstall: %v", reinstall))
 
+		utils.LogDebug("check for self update")
+		if needsSelfUpdate() {
+			utils.LogInfo(
+				fmt.Sprintf(
+					"New version of %s is available! Use %s to update.",
+					color.CyanString(core.AppName),
+					color.CyanString(fmt.Sprintf("%s self-update", core.AppExecutableName)),
+				),
+			)
+		}
+
 		if len(appIds) == 0 {
 			for x := range config.Installed {
 				appIds = append(appIds, x)
