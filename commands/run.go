@@ -78,15 +78,7 @@ var RunCommand = cli.Command{
 			if err = utils.StartDetachedProcess(detachedOptions); err != nil {
 				return err
 			}
-
-			utils.LogLn()
-			utils.LogInfo(
-				fmt.Sprintf(
-					"%s Launched %s successfully!",
-					utils.LogTickPrefix,
-					color.CyanString(app.Id),
-				),
-			)
+			utils.LogDebug("launched detached process successfully")
 			return nil
 		}
 
