@@ -68,7 +68,7 @@ curl -Ls https://raw.githubusercontent.com/zyrouge/pho/main/install.sh | bash -s
 
 ## Contributing
 
-Any kind of contribution including creating issues or making pull requests is welcomed. Make sure to keep it pointful. Sponsorships through [GitHub Sponsors](https://github.com/sponsors/zyrouge) or donations through [Ko-fi](https://ko-fi.com/zyrouge) or [Patreon](https://patreon.com/zyrouge) are welcomed. It helps me to stay motivated.
+Any kind of contribution including creating issues or making pull requests is welcomed. Make sure to keep it pointful. Donations through [GitHub Sponsors](https://github.com/sponsors/zyrouge) or [Patreon](https://patreon.com/zyrouge) are welcomed. It helps me to stay motivated.
 
 ## License
 
