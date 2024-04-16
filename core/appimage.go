@@ -98,6 +98,14 @@ func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) er
 }
 
 func InstallDesktopFile(paths *AppPaths, content string) error {
+	config, err := ReadConfig()
+	if err != nil {
+		return err
+	}
+	execPath := utils.QuotedWhenSpace(paths.AppImage)
+	if !config.EnableIntegrationPrompt {
+		execPath = "env APPIMAGELAUNCHER_DISABLE=1 " + execPath
+	}
 	content = desktopFileExecRegex.ReplaceAllLiteralString(
 		content,
 		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(paths.AppImage)),

@@ -27,6 +27,10 @@ var InitCommand = cli.Command{
 			Usage: ".desktop files directory",
 		},
 		&cli.BoolFlag{
+			Name:  "enable-integration-prompt",
+			Usage: "Enables AppImageLauncher's integration prompt",
+		},
+		&cli.BoolFlag{
 			Name:  "overwrite",
 			Usage: "Overwrite config if exists",
 		},
@@ -39,6 +43,7 @@ var InitCommand = cli.Command{
 	Action: func(_ context.Context, cmd *cli.Command) error {
 		appsDir := cmd.String("apps-dir")
 		appsDesktopDir := cmd.String("apps-desktop-dir")
+		enableIntegrationPrompt := cmd.Bool("enable-integration-prompt")
 		overwrite := cmd.Bool("overwrite")
 		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument apps-dir: %s", appsDir))
@@ -153,9 +158,10 @@ var InitCommand = cli.Command{
 			return err
 		}
 		config := &core.Config{
-			AppsDir:    appsDir,
-			DesktopDir: appsDesktopDir,
-			Installed:  map[string]string{},
+			AppsDir:                 appsDir,
+			DesktopDir:              appsDesktopDir,
+			Installed:               map[string]string{},
+			EnableIntegrationPrompt: enableIntegrationPrompt,
 		}
 		err = core.SaveConfig(config)
 		if err != nil {

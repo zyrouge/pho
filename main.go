@@ -38,6 +38,7 @@ func main() {
 			&commands.SelfUpdateCommand,
 			&commands.AppConfigCommand,
 		},
+		EnableShellCompletion: true,
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {

@@ -11,9 +11,10 @@ import (
 )
 
 type Config struct {
-	AppsDir    string            `json:"AppsDir"`
-	DesktopDir string            `json:"DesktopDir"`
-	Installed  map[string]string `json:"Installed"`
+	AppsDir                 string            `json:"AppsDir"`
+	DesktopDir              string            `json:"DesktopDir"`
+	Installed               map[string]string `json:"Installed"`
+	EnableIntegrationPrompt bool              `json:"EnableIntegrationPrompt"`
 }
 
 var cachedConfig *Config
