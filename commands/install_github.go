@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -43,7 +44,7 @@ var InstallGithubCommand = cli.Command{
 			Usage:   "Automatically answer yes for questions",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
@@ -51,7 +52,7 @@ var InstallGithubCommand = cli.Command{
 		}
 
 		reader := bufio.NewReader(os.Stdin)
-		args := ctx.Args()
+		args := cmd.Args()
 		if args.Len() == 0 {
 			return errors.New("no url specified")
 		}
@@ -60,9 +61,9 @@ var InstallGithubCommand = cli.Command{
 		}
 
 		url := args.Get(0)
-		appId := ctx.String("id")
-		releaseType := ctx.String("release")
-		assumeYes := ctx.Bool("assume-yes")
+		appId := cmd.String("id")
+		releaseType := cmd.String("release")
+		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
 		utils.LogDebug(fmt.Sprintf("argument release: %v", releaseType))

@@ -19,7 +19,7 @@ func main() {
 			&cli.BoolFlag{
 				Name:       "verbose",
 				Persistent: true,
-				Action: func(ctx *cli.Context, b bool) error {
+				Action: func(_ context.Context, _ *cli.Command, b bool) error {
 					utils.LogDebugEnabled = b
 					return nil
 				},

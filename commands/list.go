@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/fatih/color"
@@ -13,7 +14,7 @@ var ListCommand = cli.Command{
 	Name:    "list",
 	Aliases: []string{"installed"},
 	Usage:   "List all installed applications",
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {

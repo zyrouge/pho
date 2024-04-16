@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,8 +24,8 @@ var SelfUpdateCommand = cli.Command{
 		},
 	},
 	Usage: fmt.Sprintf("Update %s", core.AppName),
-	Action: func(ctx *cli.Context) error {
-		reinstall := ctx.Bool("reinstall")
+	Action: func(_ context.Context, cmd *cli.Command) error {
+		reinstall := cmd.Bool("reinstall")
 		utils.LogDebug(fmt.Sprintf("argument reinstall: %v", reinstall))
 
 		utils.LogDebug("fetching latest release")

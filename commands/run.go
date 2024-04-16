@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -24,14 +25,14 @@ var RunCommand = cli.Command{
 			Usage:   "Run as a detached process",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
 		}
 
-		args := ctx.Args()
+		args := cmd.Args()
 		hasExecArgs := args.Get(1) == "--"
 		if args.Len() == 0 {
 			return errors.New("no application id specified")
@@ -45,7 +46,7 @@ var RunCommand = cli.Command{
 		if hasExecArgs {
 			execArgs = args.Slice()[2:]
 		}
-		detached := ctx.Bool("detached")
+		detached := cmd.Bool("detached")
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
 		utils.LogDebug(fmt.Sprintf("argument exec-args: %s", strings.Join(execArgs, " ")))
 		utils.LogDebug(fmt.Sprintf("argument detached: %v", detached))
@@ -85,12 +86,12 @@ var RunCommand = cli.Command{
 			return nil
 		}
 
-		cmd := exec.Command(execPath)
-		cmd.Dir = execDir
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err = cmd.Run(); err != nil {
+		proc := exec.Command(execPath)
+		proc.Dir = execDir
+		proc.Stdin = os.Stdin
+		proc.Stdout = os.Stdout
+		proc.Stderr = os.Stderr
+		if err = proc.Run(); err != nil {
 			return err
 		}
 		return nil

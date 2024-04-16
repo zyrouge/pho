@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -24,20 +25,20 @@ var UninstallCommand = cli.Command{
 			Usage:   "Automatically answer yes for questions",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
 		}
 
 		reader := bufio.NewReader(os.Stdin)
-		args := ctx.Args()
+		args := cmd.Args()
 		if args.Len() == 0 {
 			return errors.New("no application ids specified")
 		}
 
 		appIds := args.Slice()
-		assumeYes := ctx.Bool("assume-yes")
+		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument ids: %s", strings.Join(appIds, ", ")))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 

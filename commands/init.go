@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -35,11 +36,11 @@ var InitCommand = cli.Command{
 			Usage:   "Automatically answer yes for questions",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
-		appsDir := ctx.String("apps-dir")
-		appsDesktopDir := ctx.String("apps-desktop-dir")
-		overwrite := ctx.Bool("overwrite")
-		assumeYes := ctx.Bool("assume-yes")
+	Action: func(_ context.Context, cmd *cli.Command) error {
+		appsDir := cmd.String("apps-dir")
+		appsDesktopDir := cmd.String("apps-desktop-dir")
+		overwrite := cmd.Bool("overwrite")
+		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument apps-dir: %s", appsDir))
 		utils.LogDebug(fmt.Sprintf("argument apps-desktop-dir: %s", appsDesktopDir))
 		utils.LogDebug(fmt.Sprintf("argument overwrite: %v", overwrite))

@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -15,14 +16,14 @@ import (
 var AppConfigSetIdCommand = cli.Command{
 	Name:  "set-id",
 	Usage: "Update an application's identifier",
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
 			return err
 		}
 
-		args := ctx.Args()
+		args := cmd.Args()
 		if args.Len() == 0 {
 			return errors.New("no application id specified")
 		}

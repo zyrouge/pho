@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 
@@ -22,7 +23,7 @@ var TidyBrokenCommand = cli.Command{
 			Usage:   "Automatically answer yes for questions",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading transactions")
 		transactions, err := core.GetTransactions()
 		if err != nil {
@@ -30,7 +31,7 @@ var TidyBrokenCommand = cli.Command{
 		}
 
 		reader := bufio.NewReader(os.Stdin)
-		assumeYes := ctx.Bool("assume-yes")
+		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
 		utils.LogLn()

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -31,7 +32,7 @@ var InstallLocalCommand = cli.Command{
 			Usage:   "Automatically answer yes for questions",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
@@ -39,7 +40,7 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		reader := bufio.NewReader(os.Stdin)
-		args := ctx.Args()
+		args := cmd.Args()
 		if args.Len() == 0 {
 			return errors.New("no url specified")
 		}
@@ -48,9 +49,9 @@ var InstallLocalCommand = cli.Command{
 		}
 
 		appImagePath := args.Get(0)
-		appId := ctx.String("id")
-		appVersion := ctx.String("version")
-		assumeYes := ctx.Bool("assume-yes")
+		appId := cmd.String("id")
+		appVersion := cmd.String("version")
+		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument path: %s", appImagePath))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))

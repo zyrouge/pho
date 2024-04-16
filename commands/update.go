@@ -2,6 +2,7 @@ package commands
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -27,7 +28,7 @@ var UpdateCommand = cli.Command{
 			Usage: "Forcefully update and reinstall application",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(_ context.Context, cmd *cli.Command) error {
 		utils.LogDebug("reading config")
 		config, err := core.GetConfig()
 		if err != nil {
@@ -35,11 +36,11 @@ var UpdateCommand = cli.Command{
 		}
 
 		reader := bufio.NewReader(os.Stdin)
-		args := ctx.Args()
+		args := cmd.Args()
 
 		appIds := args.Slice()
-		assumeYes := ctx.Bool("assume-yes")
-		reinstall := ctx.Bool("reinstall")
+		assumeYes := cmd.Bool("assume-yes")
+		reinstall := cmd.Bool("reinstall")
 		utils.LogDebug(fmt.Sprintf("argument ids: %s", strings.Join(appIds, ", ")))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 		utils.LogDebug(fmt.Sprintf("argument reinstall: %v", reinstall))
