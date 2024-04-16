@@ -27,6 +27,11 @@ var InstallLocalCommand = cli.Command{
 			Usage: "Application version",
 		},
 		&cli.BoolFlag{
+			Name:    "link",
+			Aliases: []string{"l"},
+			Usage:   "Creates a symlink",
+		},
+		&cli.BoolFlag{
 			Name:    "assume-yes",
 			Aliases: []string{"y"},
 			Usage:   "Automatically answer yes for questions",
@@ -51,9 +56,11 @@ var InstallLocalCommand = cli.Command{
 		appImagePath := args.Get(0)
 		appId := cmd.String("id")
 		appVersion := cmd.String("version")
+		link := cmd.Bool("link")
 		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument path: %s", appImagePath))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
+		utils.LogDebug(fmt.Sprintf("argument link: %v", link))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
 		if appImagePath == "" {
@@ -98,7 +105,9 @@ var InstallLocalCommand = cli.Command{
 			appVersion = "0.0.0"
 		}
 
-		appPaths := core.ConstructAppPaths(config, appId)
+		appPaths := core.ConstructAppPaths(config, appId, &core.ConstructAppPathsOptions{
+			Symlink: link,
+		})
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(
 				fmt.Sprintf(
@@ -124,6 +133,9 @@ var InstallLocalCommand = cli.Command{
 		summary.Add(utils.LogRightArrowPrefix, "Version", color.CyanString(appVersion))
 		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(appPaths.AppImage))
 		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
+		if appPaths.Symlink != "" {
+			summary.Add(utils.LogRightArrowPrefix, "Symlink", color.CyanString(appPaths.Symlink))
+		}
 		summary.Print()
 
 		if !assumeYes {

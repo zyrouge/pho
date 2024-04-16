@@ -15,6 +15,7 @@ type Config struct {
 	DesktopDir              string            `json:"DesktopDir"`
 	Installed               map[string]string `json:"Installed"`
 	EnableIntegrationPrompt bool              `json:"EnableIntegrationPrompt"`
+	SymlinksDir             string            `json:"SymlinksDir"`
 }
 
 var cachedConfig *Config

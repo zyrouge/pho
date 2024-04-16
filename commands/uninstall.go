@@ -157,5 +157,12 @@ func UninstallApp(app *core.AppConfig) int {
 		utils.LogError(err)
 		failed++
 	}
+	if app.Paths.Symlink != "" {
+		utils.LogDebug(fmt.Sprintf("removing %s", app.Paths.Symlink))
+		if err = os.Remove(app.Paths.Symlink); err != nil {
+			utils.LogError(err)
+			failed++
+		}
+	}
 	return failed
 }

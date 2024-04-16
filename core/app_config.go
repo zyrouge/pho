@@ -23,6 +23,7 @@ type AppPaths struct {
 	AppImage     string `json:"AppImage"`
 	Icon         string `json:"Icon"`
 	Desktop      string `json:"Desktop"`
+	Symlink      string `json:"Symlink"`
 }
 
 func ReadAppConfig(configPath string) (*AppConfig, error) {
@@ -41,8 +42,16 @@ func ConstructAppId(appName string) string {
 	return utils.CleanId(appName)
 }
 
-func ConstructAppPaths(config *Config, appId string) *AppPaths {
+type ConstructAppPathsOptions struct {
+	Symlink bool
+}
+
+func ConstructAppPaths(config *Config, appId string, options *ConstructAppPathsOptions) *AppPaths {
 	appDir := path.Join(config.AppsDir, appId)
+	symlinkPath := ""
+	if config.SymlinksDir != "" && options.Symlink {
+		symlinkPath = path.Join(config.SymlinksDir, appId)
+	}
 	return &AppPaths{
 		Dir:          appDir,
 		Config:       path.Join(appDir, "config.pho.json"),
@@ -50,6 +59,7 @@ func ConstructAppPaths(config *Config, appId string) *AppPaths {
 		AppImage:     path.Join(appDir, fmt.Sprintf("%s.AppImage", appId)),
 		Icon:         path.Join(appDir, fmt.Sprintf("%s.png", appId)),
 		Desktop:      path.Join(config.DesktopDir, fmt.Sprintf("%s.desktop", appId)),
+		Symlink:      symlinkPath,
 	}
 }
 

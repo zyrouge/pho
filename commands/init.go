@@ -26,6 +26,14 @@ var InitCommand = cli.Command{
 			Name:  "apps-desktop-dir",
 			Usage: ".desktop files directory",
 		},
+		&cli.StringFlag{
+			Name:  "apps-desktop-dir",
+			Usage: ".desktop files directory",
+		},
+		&cli.StringFlag{
+			Name:  "apps-link-dir",
+			Usage: "AppImage symlinks directory",
+		},
 		&cli.BoolFlag{
 			Name:  "enable-integration-prompt",
 			Usage: "Enables AppImageLauncher's integration prompt",
@@ -37,17 +45,20 @@ var InitCommand = cli.Command{
 		&cli.BoolFlag{
 			Name:    "assume-yes",
 			Aliases: []string{"y"},
-			Usage:   "Automatically answer yes for questions",
+			Usage:   "Automatically answer 'yes' for questions",
 		},
 	},
 	Action: func(_ context.Context, cmd *cli.Command) error {
 		appsDir := cmd.String("apps-dir")
 		appsDesktopDir := cmd.String("apps-desktop-dir")
-		enableIntegrationPrompt := cmd.Bool("enable-integration-prompt")
+		appsLinkDir := cmd.String("apps-link-dir")
+		enableIntegrationPromptSet, enableIntegrationPrompt := utils.CommandBoolSetAndValue(cmd, "enable-integration-prompt")
 		overwrite := cmd.Bool("overwrite")
 		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument apps-dir: %s", appsDir))
 		utils.LogDebug(fmt.Sprintf("argument apps-desktop-dir: %s", appsDesktopDir))
+		utils.LogDebug(fmt.Sprintf("argument apps-link-dir: %s", appsLinkDir))
+		utils.LogDebug(fmt.Sprintf("argument enable-integration-prompt: %v", enableIntegrationPrompt))
 		utils.LogDebug(fmt.Sprintf("argument overwrite: %v", overwrite))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
@@ -101,7 +112,7 @@ var InitCommand = cli.Command{
 			}
 		}
 		if appsDir == "" {
-			return errors.New("invalid application name")
+			return errors.New("invalid application storage folder path")
 		}
 		appsDir, err = utils.ResolvePath(appsDir)
 		if err != nil {
@@ -122,11 +133,44 @@ var InitCommand = cli.Command{
 			}
 		}
 		if appsDesktopDir == "" {
-			return errors.New("invalid application desktop file path")
+			return errors.New("invalid application desktop folder path")
 		}
 		appsDesktopDir, err = utils.ResolvePath(appsDesktopDir)
 		if err != nil {
 			return err
+		}
+
+		if appsLinkDir == "" {
+			appsLinkDir = path.Join(homeDir, ".local/bin")
+			if !assumeYes {
+				appsLinkDir, err = utils.PromptTextInput(
+					reader,
+					"Where do you want to symlink AppImage files?",
+					appsLinkDir,
+				)
+				if err != nil {
+					return err
+				}
+			}
+		}
+		if appsLinkDir == "" {
+			return errors.New("invalid application links folder path")
+		}
+		appsLinkDir, err = utils.ResolvePath(appsLinkDir)
+		if err != nil {
+			return err
+		}
+
+		if !enableIntegrationPromptSet {
+			if !assumeYes {
+				enableIntegrationPrompt, err = utils.PromptYesNoInput(
+					reader,
+					"Do you want to disable AppImageLauncher's integration prompt?",
+				)
+				if err != nil {
+					return err
+				}
+			}
 		}
 
 		utils.LogLn()
@@ -162,6 +206,7 @@ var InitCommand = cli.Command{
 			DesktopDir:              appsDesktopDir,
 			Installed:               map[string]string{},
 			EnableIntegrationPrompt: enableIntegrationPrompt,
+			SymlinksDir:             appsLinkDir,
 		}
 		err = core.SaveConfig(config)
 		if err != nil {

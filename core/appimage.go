@@ -108,7 +108,7 @@ func InstallDesktopFile(paths *AppPaths, content string) error {
 	}
 	content = desktopFileExecRegex.ReplaceAllLiteralString(
 		content,
-		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(paths.AppImage)),
+		fmt.Sprintf("Exec=%s", execPath),
 	)
 	content = desktopFileIconRegex.ReplaceAllLiteralString(
 		content,
@@ -125,4 +125,11 @@ func InstallDesktopFile(paths *AppPaths, content string) error {
 func UninstallDesktopFile(desktopFilePath string) error {
 	cmd := exec.Command("xdg-desktop-menu", "uninstall", desktopFilePath, "--novendor")
 	return cmd.Run()
+}
+
+func (metadata *DeflatedAppImageMetadata) Symlink(paths *AppPaths) error {
+	if err := os.Symlink(paths.AppImage, paths.Symlink); err != nil {
+		return err
+	}
+	return nil
 }

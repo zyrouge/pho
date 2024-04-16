@@ -39,6 +39,11 @@ var InstallGithubCommand = cli.Command{
 			Value: githubSourceReleaseStrings[0],
 		},
 		&cli.BoolFlag{
+			Name:    "link",
+			Aliases: []string{"l"},
+			Usage:   "Creates a symlink",
+		},
+		&cli.BoolFlag{
 			Name:    "assume-yes",
 			Aliases: []string{"y"},
 			Usage:   "Automatically answer yes for questions",
@@ -63,10 +68,12 @@ var InstallGithubCommand = cli.Command{
 		url := args.Get(0)
 		appId := cmd.String("id")
 		releaseType := cmd.String("release")
+		link := cmd.Bool("link")
 		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
 		utils.LogDebug(fmt.Sprintf("argument release: %v", releaseType))
+		utils.LogDebug(fmt.Sprintf("argument link: %v", link))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
 		isValidUrl, ghUsername, ghReponame := core.ParseGithubRepoUrl(url)
@@ -109,7 +116,9 @@ var InstallGithubCommand = cli.Command{
 		}
 		utils.LogDebug(fmt.Sprintf("selected asset url %s", asset.DownloadUrl))
 
-		appPaths := core.ConstructAppPaths(config, appId)
+		appPaths := core.ConstructAppPaths(config, appId, &core.ConstructAppPathsOptions{
+			Symlink: link,
+		})
 		if _, ok := config.Installed[appId]; ok {
 			utils.LogWarning(fmt.Sprintf("application with id %s already exists", appId))
 			if !assumeYes {
@@ -131,6 +140,9 @@ var InstallGithubCommand = cli.Command{
 		summary.Add(utils.LogRightArrowPrefix, "Filename", color.CyanString(asset.Name))
 		summary.Add(utils.LogRightArrowPrefix, "AppImage", color.CyanString(appPaths.AppImage))
 		summary.Add(utils.LogRightArrowPrefix, ".desktop file", color.CyanString(appPaths.Desktop))
+		if appPaths.Symlink != "" {
+			summary.Add(utils.LogRightArrowPrefix, "Symlink", color.CyanString(appPaths.Symlink))
+		}
 		summary.Add(utils.LogRightArrowPrefix, "Download Size", color.CyanString(prettyBytes(asset.Size)))
 		summary.Print()
 		utils.LogLn()

@@ -59,7 +59,9 @@ var AppConfigSetIdCommand = cli.Command{
 			return err
 		}
 		fromAppPaths := app.Paths
-		toAppPaths := core.ConstructAppPaths(config, toAppId)
+		toAppPaths := core.ConstructAppPaths(config, toAppId, &core.ConstructAppPathsOptions{
+			Symlink: fromAppPaths.Symlink != "",
+		})
 		app.Id = toAppId
 		app.Paths = *toAppPaths
 		delete(config.Installed, fromAppId)
@@ -96,6 +98,16 @@ var AppConfigSetIdCommand = cli.Command{
 		utils.LogDebug(fmt.Sprintf("installing .desktop file at %s", fromAppPaths.Desktop))
 		if err = core.InstallDesktopFile(toAppPaths, string(desktopContent)); err != nil {
 			return err
+		}
+		if toAppPaths.Symlink != "" {
+			utils.LogDebug(fmt.Sprintf("removing symlink at %s", fromAppPaths.Symlink))
+			if err = os.Remove(fromAppPaths.Symlink); err != nil {
+				return err
+			}
+			utils.LogDebug(fmt.Sprintf("creating symlink at %s", toAppPaths.Symlink))
+			if err = os.Symlink(toAppPaths.AppImage, toAppPaths.Symlink); err != nil {
+				return err
+			}
 		}
 
 		utils.LogLn()

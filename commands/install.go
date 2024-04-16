@@ -246,6 +246,10 @@ func (x *InstallableApp) Integrate() error {
 	if err = metadata.InstallDesktopFile(&x.App.Paths); err != nil {
 		return err
 	}
+	x.logDebug(fmt.Sprintf("creating symlink %s", x.App.Paths.Symlink))
+	if err = metadata.Symlink(&x.App.Paths); err != nil {
+		return err
+	}
 	return nil
 }
 
