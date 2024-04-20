@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"slices"
 	"time"
 
 	"github.com/fatih/color"
@@ -49,14 +50,29 @@ type InstallableApp struct {
 	Count          int
 	StartedAt      int64
 	Progress       int64
+	RawProgress    InstallableAppRawProgress
+	Speed          int64
+	RemainingSecs  int64
 	PrintCycle     int
 	SkipCycleErase bool
 	Status         InstallableAppStatus
 }
 
+type InstallableAppRawProgress struct {
+	Sizes []int
+	Times []int64
+}
+
 func (x *InstallableApp) Write(data []byte) (n int, err error) {
 	l := len(data)
 	x.Progress += int64(l)
+	x.RawProgress.Sizes = append(x.RawProgress.Sizes, l)
+	x.RawProgress.Times = append(x.RawProgress.Times, utils.TimeNowSeconds())
+	remove := len(x.RawProgress.Sizes) - 50
+	if remove > 0 {
+		x.RawProgress.Sizes = slices.Delete(x.RawProgress.Sizes, 0, remove)
+		x.RawProgress.Times = slices.Delete(x.RawProgress.Times, 0, remove)
+	}
 	return l, nil
 }
 
@@ -75,9 +91,9 @@ func (x *InstallableApp) PrintStatus() {
 	x.PrintCycle++
 
 	prefix := color.HiBlackString(fmt.Sprintf("[%d/%d]", x.Index+1, x.Count))
-	suffix := color.HiBlackString(
-		fmt.Sprintf("(%s)", utils.HumanizeSeconds(utils.TimeNowSeconds()-x.StartedAt)),
-	)
+	elapsedSecs := utils.HumanizeSeconds(utils.TimeNowSeconds() - x.StartedAt)
+	suffix := color.HiBlackString(fmt.Sprintf("(%s)", elapsedSecs))
+
 	switch x.Status {
 	case InstallableAppFailed:
 		fmt.Printf(
@@ -90,6 +106,15 @@ func (x *InstallableApp) PrintStatus() {
 		)
 
 	case InstallableAppDownloading:
+		x.calculateMetrics()
+		suffix := color.HiBlackString(
+			fmt.Sprintf(
+				"(%s / %s @ %s/s)",
+				elapsedSecs,
+				utils.HumanizeSeconds(x.RemainingSecs),
+				prettyBytes(x.Speed),
+			),
+		)
 		fmt.Printf(
 			"%s %s %s %s (%s / %s) %s\n",
 			prefix,
@@ -144,6 +169,10 @@ func InstallApps(apps []InstallableApp) (int, int) {
 		x.Count = count
 		x.StartedAt = utils.TimeNowSeconds()
 		x.Status = InstallableAppDownloading
+		x.RawProgress = InstallableAppRawProgress{
+			Sizes: []int{},
+			Times: []int64{},
+		}
 		x.PrintStatus()
 		x.logDebug("updating transactions")
 		core.UpdateTransactions(func(transactions *core.Transactions) error {
@@ -274,6 +303,28 @@ func (x *InstallableApp) SaveConfig() error {
 }
 
 func prettyBytes(size int64) string {
+	if size < 1000 {
+		kb := float32(size) / 1000
+		return fmt.Sprintf("%.2f KB", kb)
+	}
 	mb := float32(size) / 1000000
 	return fmt.Sprintf("%.2f MB", mb)
+}
+
+func (x *InstallableApp) calculateMetrics() {
+	count := len(x.RawProgress.Sizes)
+	if count < 2 {
+		return
+	}
+	total := 0
+	for _, x := range x.RawProgress.Sizes {
+		total += x
+	}
+	time := max(1, x.RawProgress.Times[count-1]-x.RawProgress.Times[0])
+	x.Speed = int64(total) / time
+	if x.Speed > 0 {
+		x.RemainingSecs = (x.Asset.Size - x.Progress) / x.Speed
+	} else {
+		x.RemainingSecs = 0
+	}
 }
