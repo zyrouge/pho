@@ -27,10 +27,6 @@ var InitCommand = cli.Command{
 			Usage: ".desktop files directory",
 		},
 		&cli.StringFlag{
-			Name:  "apps-desktop-dir",
-			Usage: ".desktop files directory",
-		},
-		&cli.StringFlag{
 			Name:  "apps-link-dir",
 			Usage: "AppImage symlinks directory",
 		},
