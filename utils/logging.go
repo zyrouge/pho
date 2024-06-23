@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
@@ -16,7 +17,7 @@ var LogRightArrowPrefix = color.MagentaString(">")
 var LogTickPrefix = color.GreenString("√")
 var LogExclamationPrefix = color.RedString("!")
 
-var LogDebugEnabled = false
+var LogDebugEnabled = os.Getenv("DEBUG") == "1"
 
 func LogInfo(msg string) {
 	fmt.Println(msg)
