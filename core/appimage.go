@@ -106,12 +106,14 @@ func InstallDesktopFile(paths *AppPaths, content string) error {
 	if !config.EnableIntegrationPrompt {
 		execPath = "env APPIMAGELAUNCHER_DISABLE=1 " + execPath
 	}
-	content = desktopFileExecRegex.ReplaceAllLiteralString(
+	content = replaceDesktopEntry(
 		content,
-		fmt.Sprintf("Exec=%s", execPath),
+		desktopFileExecRegex,
+		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(execPath)),
 	)
-	content = desktopFileIconRegex.ReplaceAllLiteralString(
+	content = replaceDesktopEntry(
 		content,
+		desktopFileIconRegex,
 		fmt.Sprintf("Icon=%s", utils.QuotedWhenSpace(paths.Icon)),
 	)
 	content = strings.TrimSpace(content)
@@ -132,4 +134,19 @@ func (metadata *DeflatedAppImageMetadata) Symlink(paths *AppPaths) error {
 		return err
 	}
 	return nil
+}
+
+func replaceDesktopEntry(content string, pattern *regexp.Regexp, replaceWith string) string {
+	count := 0
+	content = pattern.ReplaceAllStringFunc(content, func(s string) string {
+		count++
+		return replaceWith
+	})
+	if count == 0 {
+		if !strings.HasSuffix(content, "\n") {
+			content += "\n"
+		}
+		content += replaceWith
+	}
+	return content
 }
