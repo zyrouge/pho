@@ -17,6 +17,7 @@ import (
 var githubSourceReleaseStrings = []string{
 	string(core.GithubSourceReleaseLatest),
 	string(core.GithubSourceReleasePreRelease),
+	string(core.GithubSourceReleaseTagged),
 	string(core.GithubSourceReleaseAny),
 }
 
@@ -37,6 +38,14 @@ var InstallGithubCommand = cli.Command{
 				strings.Join(githubSourceReleaseStrings, ", "),
 			),
 			Value: githubSourceReleaseStrings[0],
+		},
+		&cli.StringFlag{
+			Name:    "tag",
+			Aliases: []string{"t"},
+			Usage: fmt.Sprintf(
+				"Release tag name (requires release to be %s)",
+				core.GithubSourceReleaseTagged,
+			),
 		},
 		&cli.BoolFlag{
 			Name:    "link",
@@ -68,11 +77,13 @@ var InstallGithubCommand = cli.Command{
 		url := args.Get(0)
 		appId := cmd.String("id")
 		releaseType := cmd.String("release")
+		tagName := cmd.String("tag")
 		link := cmd.Bool("link")
 		assumeYes := cmd.Bool("assume-yes")
 		utils.LogDebug(fmt.Sprintf("argument url: %s", url))
 		utils.LogDebug(fmt.Sprintf("argument id: %s", appId))
 		utils.LogDebug(fmt.Sprintf("argument release: %v", releaseType))
+		utils.LogDebug(fmt.Sprintf("argument tag: %v", tagName))
 		utils.LogDebug(fmt.Sprintf("argument link: %v", link))
 		utils.LogDebug(fmt.Sprintf("argument assume-yes: %v", assumeYes))
 
@@ -100,6 +111,7 @@ var InstallGithubCommand = cli.Command{
 			UserName: ghUsername,
 			RepoName: ghReponame,
 			Release:  core.GithubSourceRelease(releaseType),
+			TagName:  tagName,
 		}
 		release, err := source.FetchAptRelease()
 		if err != nil {

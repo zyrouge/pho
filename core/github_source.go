@@ -14,6 +14,7 @@ type GithubSourceRelease string
 const (
 	GithubSourceReleaseLatest     GithubSourceRelease = "latest"
 	GithubSourceReleasePreRelease GithubSourceRelease = "prerelease"
+	GithubSourceReleaseTagged     GithubSourceRelease = "tag"
 	GithubSourceReleaseAny        GithubSourceRelease = "any"
 )
 
@@ -21,6 +22,7 @@ type GithubSource struct {
 	UserName string              `json:"UserName"`
 	RepoName string              `json:"RepoName"`
 	Release  GithubSourceRelease `json:"Release"`
+	TagName  string              `json:"TagName"`
 }
 
 func ReadGithubSourceConfig(configPath string) (*GithubSource, error) {
@@ -38,6 +40,9 @@ func (source *GithubSource) FetchAptLatestRelease() (*GithubApiRelease, error) {
 
 	case GithubSourceReleasePreRelease:
 		return GithubApiFetchLatestPreRelease(source.UserName, source.RepoName)
+
+	case GithubSourceReleaseTagged:
+		return GithubApiFetchTaggedRelease(source.UserName, source.RepoName, source.TagName)
 
 	case GithubSourceReleaseAny:
 		return GithubApiFetchLatestAny(source.UserName, source.RepoName)
