@@ -86,7 +86,7 @@ func (metadata *DeflatedAppImageMetadata) CopyIconFile(paths *AppPaths) error {
 	return err
 }
 
-var desktopFileExecRegex = regexp.MustCompile(`Exec=("[^"]+"|[^ ]+)`)
+var desktopFileExecRegex = regexp.MustCompile(`Exec=("[^"]+"|[^\s]+)`)
 var desktopFileIconRegex = regexp.MustCompile(`Icon=[^\n]+`)
 
 func (metadata *DeflatedAppImageMetadata) InstallDesktopFile(paths *AppPaths) error {
