@@ -30,3 +30,10 @@ func EncloseWhen(text string, when string, start string, end string) string {
 	}
 	return start + text + end
 }
+
+func BoolToYesNo(value bool) string {
+	if value {
+		return "yes"
+	}
+	return "no"
+}

@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -107,9 +106,6 @@ var InitCommand = cli.Command{
 				}
 			}
 		}
-		if appsDir == "" {
-			return errors.New("invalid application storage folder path")
-		}
 		appsDir, err = utils.ResolvePath(appsDir)
 		if err != nil {
 			return err
@@ -128,15 +124,22 @@ var InitCommand = cli.Command{
 				}
 			}
 		}
-		if appsDesktopDir == "" {
-			return errors.New("invalid application desktop folder path")
-		}
 		appsDesktopDir, err = utils.ResolvePath(appsDesktopDir)
 		if err != nil {
 			return err
 		}
 
-		if appsLinkDir == "" {
+		enableAppsLinkDir := true
+		if !assumeYes {
+			enableAppsLinkDir, err = utils.PromptYesNoInput(
+				reader,
+				"Do you want to symlink AppImage files?",
+			)
+			if err != nil {
+				return err
+			}
+		}
+		if enableAppsLinkDir && appsLinkDir == "" {
 			appsLinkDir = path.Join(homeDir, ".local/bin")
 			if !assumeYes {
 				appsLinkDir, err = utils.PromptTextInput(
@@ -149,23 +152,18 @@ var InitCommand = cli.Command{
 				}
 			}
 		}
-		if appsLinkDir == "" {
-			return errors.New("invalid application links folder path")
-		}
 		appsLinkDir, err = utils.ResolvePath(appsLinkDir)
 		if err != nil {
 			return err
 		}
 
-		if !enableIntegrationPromptSet {
-			if !assumeYes {
-				enableIntegrationPrompt, err = utils.PromptYesNoInput(
-					reader,
-					"Do you want to disable AppImageLauncher's integration prompt?",
-				)
-				if err != nil {
-					return err
-				}
+		if !enableIntegrationPromptSet && !assumeYes {
+			enableIntegrationPrompt, err = utils.PromptYesNoInput(
+				reader,
+				"Do you want to enable AppImageLauncher's integration prompt?",
+			)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -174,6 +172,10 @@ var InitCommand = cli.Command{
 		summary.Add(utils.LogRightArrowPrefix, "Configuration file", color.CyanString(configPath))
 		summary.Add(utils.LogRightArrowPrefix, "AppImages directory", color.CyanString(appsDir))
 		summary.Add(utils.LogRightArrowPrefix, ".desktop files directory", color.CyanString(appsDesktopDir))
+		if enableAppsLinkDir {
+			summary.Add(utils.LogRightArrowPrefix, "AppImages symlink directory", color.CyanString(appsLinkDir))
+		}
+		summary.Add(utils.LogRightArrowPrefix, "Enable AppImageLauncher's integration prompt?", color.CyanString(utils.BoolToYesNo(enableIntegrationPrompt)))
 		summary.Print()
 		utils.LogLn()
 

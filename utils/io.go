@@ -28,6 +28,9 @@ func FileExists(name string) (bool, error) {
 }
 
 func ResolvePath(name string) (string, error) {
+	if name == "" {
+		return "", errors.New("cannot resolve to empty path")
+	}
 	if strings.HasPrefix(name, "~/") {
 		home, err := os.UserHomeDir()
 		if err != nil {
