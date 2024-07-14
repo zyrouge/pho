@@ -65,10 +65,17 @@ type InstallableAppRawProgress struct {
 
 func (x *InstallableApp) Write(data []byte) (n int, err error) {
 	l := len(data)
+	now := utils.TimeNowSeconds()
 	x.Progress += int64(l)
 	x.RawProgress.Sizes = append(x.RawProgress.Sizes, l)
-	x.RawProgress.Times = append(x.RawProgress.Times, utils.TimeNowSeconds())
-	remove := len(x.RawProgress.Sizes) - 50
+	x.RawProgress.Times = append(x.RawProgress.Times, now)
+	remove := 0
+	for i, t := range x.RawProgress.Times {
+		if now-t < 10 {
+			break
+		}
+		remove = i
+	}
 	if remove > 0 {
 		x.RawProgress.Sizes = slices.Delete(x.RawProgress.Sizes, 0, remove)
 		x.RawProgress.Times = slices.Delete(x.RawProgress.Times, 0, remove)
@@ -316,12 +323,12 @@ func (x *InstallableApp) calculateMetrics() {
 	if count < 2 {
 		return
 	}
-	total := 0
+	total := int64(0)
 	for _, x := range x.RawProgress.Sizes {
-		total += x
+		total += int64(x)
 	}
 	time := max(1, x.RawProgress.Times[count-1]-x.RawProgress.Times[0])
-	x.Speed = int64(total) / time
+	x.Speed = total / time
 	if x.Speed > 0 {
 		x.RemainingSecs = (x.Asset.Size - x.Progress) / x.Speed
 	} else {
