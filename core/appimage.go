@@ -74,7 +74,11 @@ func (deflated *DeflatedAppImage) ExtractExecName() (string, error) {
 func (metadata *DeflatedAppImageMetadata) CopyIconFile(paths *AppPaths) error {
 	src, err := os.Open(metadata.IconPath)
 	if err != nil {
-		return err
+		pngPath := path.Join(metadata.AppDir, fmt.Sprintf("%s.png", metadata.ExecName))
+		src, err = os.Open(pngPath)
+		if err != nil {
+			return err
+		}
 	}
 	defer src.Close()
 	dest, err := os.Create(paths.Icon)
