@@ -151,6 +151,8 @@ var InitCommand = cli.Command{
 					return err
 				}
 			}
+		}
+		if appsLinkDir != "" {
 			appsLinkDir, err = utils.ResolvePath(appsLinkDir)
 			if err != nil {
 				return err
