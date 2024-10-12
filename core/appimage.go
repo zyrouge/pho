@@ -109,7 +109,7 @@ func InstallDesktopFile(paths *AppPaths, content string) error {
 	content = replaceDesktopEntry(
 		content,
 		desktopFileExecRegex,
-		fmt.Sprintf("Exec=%s", utils.QuotedWhenSpace(execPath)),
+		fmt.Sprintf("Exec=%s", execPath),
 	)
 	content = replaceDesktopEntry(
 		content,
