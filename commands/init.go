@@ -152,9 +152,11 @@ var InitCommand = cli.Command{
 				}
 			}
 		}
-		appsLinkDir, err = utils.ResolvePath(appsLinkDir)
-		if err != nil {
-			return err
+		if appsLinkDir != "" {
+			appsLinkDir, err = utils.ResolvePath(appsLinkDir)
+			if err != nil {
+				return err
+			}
 		}
 
 		if !enableIntegrationPromptSet && !assumeYes {
