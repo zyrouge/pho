@@ -47,7 +47,11 @@ func (deflated *DeflatedAppImage) ExtractMetadata() (*DeflatedAppImageMetadata, 
 		return nil, err
 	}
 	desktopPath := path.Join(deflated.AppDir, fmt.Sprintf("%s.desktop", execName))
-	iconPath := path.Join(deflated.AppDir, ".DirIcon")
+	_, iconPath := utils.FindFileInDir(deflated.AppDir, []string{
+		".DirIcon",
+		fmt.Sprintf("%s.png", execName),
+		fmt.Sprintf("%s.jpg", execName),
+	})
 	metadata := &DeflatedAppImageMetadata{
 		DeflatedAppImage: deflated,
 		ExecName:         execName,
@@ -72,13 +76,12 @@ func (deflated *DeflatedAppImage) ExtractExecName() (string, error) {
 }
 
 func (metadata *DeflatedAppImageMetadata) CopyIconFile(paths *AppPaths) error {
+	if metadata.IconPath == "" {
+		return nil
+	}
 	src, err := os.Open(metadata.IconPath)
 	if err != nil {
-		pngPath := path.Join(metadata.AppDir, fmt.Sprintf("%s.png", metadata.ExecName))
-		src, err = os.Open(pngPath)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	defer src.Close()
 	dest, err := os.Create(paths.Icon)

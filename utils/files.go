@@ -86,3 +86,13 @@ func WriteJsonFileAtomic[T any](name string, data *T) error {
 	}
 	return WriteFileAtomic(name, json)
 }
+
+func FindFileInDir(dir string, names []string) (bool, string) {
+	for _, x := range names {
+		p := path.Join(dir, x)
+		if _, err := os.Lstat(p); err == nil {
+			return true, p
+		}
+	}
+	return false, ""
+}
