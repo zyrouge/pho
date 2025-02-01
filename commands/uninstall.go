@@ -16,7 +16,7 @@ import (
 
 var UninstallCommand = cli.Command{
 	Name:    "uninstall",
-	Aliases: []string{"remove", "delete"},
+	Aliases: []string{"remove", "del"},
 	Usage:   "Uninstall an application",
 	Flags: []cli.Flag{
 		&cli.BoolFlag{
